@@ -7,8 +7,8 @@
     <groupId>com.flowingcode.vaadin.addons</groupId>
     <artifactId>json-migration-helper</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Template Add-on</name>
-    <description>Template Add-on for Vaadin Flow</description>
+    <name>Json Migration Helper</name>
+    <description>Json Migration Helper for Vaadin Flow</description>
     <url>https://www.flowingcode.com/en/open-source/</url>
 
     <properties>

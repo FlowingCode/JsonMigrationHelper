@@ -1,10 +1,10 @@
-[![Published on Vaadin Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/template-add-on)
-[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/template-add-on.svg)](https://vaadin.com/directory/component/template-add-on)
-[![Build Status](https://jenkins.flowingcode.com/job/template-addon/badge/icon)](https://jenkins.flowingcode.com/job/template-addon)
-[![Maven Central](https://img.shields.io/maven-central/v/com.flowingcode.vaadin.addons/template-addon)](https://mvnrepository.com/artifact/com.flowingcode.vaadin.addons/template-addon)
-[![Javadoc](https://img.shields.io/badge/javadoc-00b4f0)](https://javadoc.flowingcode.com/artifact/com.flowingcode.vaadin.addons/template-addon)
+[![Published on Vaadin Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/json-migration-helper)
+[![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/json-migration-helper.svg)](https://vaadin.com/directory/component/json-migration-helper)
+[![Build Status](https://jenkins.flowingcode.com/job/json-migration-helper/badge/icon)](https://jenkins.flowingcode.com/job/json-migration-helper)
+[![Maven Central](https://img.shields.io/maven-central/v/com.flowingcode.vaadin.addons/json-migration-helper)](https://mvnrepository.com/artifact/com.flowingcode.vaadin.addons/json-migration-helper)
+[![Javadoc](https://img.shields.io/badge/javadoc-00b4f0)](https://javadoc.flowingcode.com/artifact/com.flowingcode.vaadin.addons/json-migration-helper)
 
-# Template Add-On
+# Json Migration Helper
 
 This is a template project for building new Vaadin 24 add-ons
 
@@ -14,11 +14,11 @@ This is a template project for building new Vaadin 24 add-ons
 
 ## Online demo
 
-[Online demo here](http://addonsv24.flowingcode.com/template)
+[Online demo here](http://addonsv24.flowingcode.com/json-migration-helper)
 
 ## Download release
 
-[Available in Vaadin Directory](https://vaadin.com/directory/component/template-add-on)
+[Available in Vaadin Directory](https://vaadin.com/directory/component/json-migration-helper)
 
 ### Maven install
 
@@ -27,7 +27,7 @@ Add the following dependencies in your pom.xml file:
 ```xml
 <dependency>
    <groupId>com.flowingcode.vaadin.addons</groupId>
-   <artifactId>template-addon</artifactId>
+   <artifactId>json-migration-helper</artifactId>
    <version>X.Y.Z</version>
 </dependency>
 ```
@@ -44,7 +44,7 @@ To see the demo, navigate to http://localhost:8080/
 
 ## Release notes
 
-See [here](https://github.com/FlowingCode/TemplateAddon/releases)
+See [here](https://github.com/FlowingCode/JsonMigrationHelper/releases)
 
 ## Issue tracking
 
@@ -82,9 +82,9 @@ Then, follow these steps for creating a contribution:
 
 ## License & Author
 
-This add-on is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
+This library is distributed under Apache License 2.0. For license terms, see LICENSE.txt.
 
-Template Add-On is written by Flowing Code S.A.
+Json Migration Helper is written by Flowing Code S.A.
 
 # Developer Guide
 
