@@ -6,7 +6,7 @@
 
     <groupId>com.flowingcode.vaadin.addons</groupId>
     <artifactId>template-addon</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.0.1-SNAPSHOT</version>
     <name>Template Add-on</name>
     <description>Template Add-on for Vaadin Flow</description>
     <url>https://www.flowingcode.com/en/open-source/</url>
