@@ -1,0 +1,46 @@
+/*-
+ * #%L
+ * Json Migration Helper
+ * %%
+ * Copyright (C) 2025 Flowing Code
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package com.flowingcode.vaadin.jsonmigration;
+
+import java.lang.reflect.Method;
+import elemental.json.JsonValue;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+
+@NoArgsConstructor
+class LegacyJsonMigrationHelper implements JsonMigrationHelper {
+
+  @Override
+  public JsonValue convertToJsonValue(Object object) {
+    if (object instanceof JsonValue) {
+      return (JsonValue) object;
+    } else {
+      throw new ClassCastException(
+          object.getClass().getName() + " cannot be converted to elemental.json.JsonObject");
+    }
+  }
+
+  @Override
+  @SneakyThrows
+  public Object invoke(Method method, Object instance, Object... args) {
+    return method.invoke(instance, args);
+  }
+
+}
