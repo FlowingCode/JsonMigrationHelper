@@ -6,15 +6,11 @@
 
 # Json Migration Helper
 
-This is a template project for building new Vaadin 24 add-ons
+Provides a compatibility layer for JSON handling to abstract away breaking changes introduced in Vaadin version 25.
 
 ## Features
 
-* List the features of your add-on in here
-
-## Online demo
-
-[Online demo here](http://addonsv24.flowingcode.com/json-migration-helper)
+Detects the runtime version and uses version-specific helpers to ensure that code calling its methods does not need to be aware of underlying Vaadin API changes.
 
 ## Download release
 
