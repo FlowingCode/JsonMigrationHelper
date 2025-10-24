@@ -1,8 +1,8 @@
 [![Published on Vaadin Directory](https://img.shields.io/badge/Vaadin%20Directory-published-00b4f0.svg)](https://vaadin.com/directory/component/json-migration-helper)
 [![Stars on vaadin.com/directory](https://img.shields.io/vaadin-directory/star/json-migration-helper.svg)](https://vaadin.com/directory/component/json-migration-helper)
-[![Build Status](https://jenkins.flowingcode.com/job/json-migration-helper/badge/icon)](https://jenkins.flowingcode.com/job/json-migration-helper)
+[![Build Status](https://jenkins.flowingcode.com/job/JsonMigrationHelper-addon/badge/icon)](https://jenkins.flowingcode.com/job/JsonMigrationHelper-addon)
 [![Maven Central](https://img.shields.io/maven-central/v/com.flowingcode.vaadin.addons/json-migration-helper)](https://mvnrepository.com/artifact/com.flowingcode.vaadin.addons/json-migration-helper)
-[![Javadoc](https://img.shields.io/badge/javadoc-00b4f0)](https://javadoc.flowingcode.com/artifact/com.flowingcode.vaadin.addons/json-migration-helper)
+[![Javadoc](https://img.shields.io/badge/javadoc-00b4f0)](https://javadoc.flowingcode.com/artifact/com.flowingcode.vaadin/json-migration-helper)
 
 # Json Migration Helper
 
