@@ -19,10 +19,12 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
-import java.lang.reflect.Method;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.Version;
+import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import java.lang.reflect.Method;
 import lombok.SneakyThrows;
 
 /**
@@ -89,6 +91,13 @@ public class JsonMigration {
     }
   }
 
+  private static Method DomEvent_getEventData = lookup_getEventData();
+
+  @SneakyThrows
+  private static Method lookup_getEventData() {
+    return DomEvent.class.getMethod("getEventData");
+  }
+
   /**
    * Sets a JSON-valued property on a given {@code Element}, transparently handling
    * version-specific method signatures.
@@ -103,6 +112,17 @@ public class JsonMigration {
    */
   public static void setPropertyJson(Element element, String name, JsonValue json) {
     invoke(Element_setPropertyJson, element, name, json);
+  }
+
+  /**
+   * Gets additional data related to the event.
+   *
+   * @param event the {@code DomEvent} from which to retrieve the data
+   * @return a JSON object containing event data, never <code>null</code>
+   * @see DomEvent#getEventData()
+   */
+  public static JsonObject getEventData(DomEvent event) {
+    return (JsonObject) convertToJsonValue(invoke(DomEvent_getEventData, event));
   }
 
 }
