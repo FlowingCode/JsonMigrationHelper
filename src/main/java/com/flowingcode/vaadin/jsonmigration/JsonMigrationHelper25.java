@@ -74,8 +74,8 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
     switch (jsonNode.getNodeType()) {
       case OBJECT:
         JsonObject jsonObject = Json.createObject();
-        JsonObject source = (JsonObject)jsonNode; 
-        for (String key : source.keys()) {
+        ObjectNode source = (ObjectNode) jsonNode;
+        for (String key : source.propertyNames()) {
           jsonObject.put(key, convertToJsonValue(source.get(key)));
         }
         return jsonObject;
