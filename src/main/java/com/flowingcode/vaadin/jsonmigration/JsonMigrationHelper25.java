@@ -114,7 +114,7 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
         JsonArray jsonArray = (JsonArray) jsonValue;
         ArrayNode arrayNode = nodeFactory.arrayNode(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
-          arrayNode.set(i, convertToJsonNode(jsonArray.get(i)));
+          arrayNode.add(convertToJsonNode(jsonArray.get(i)));
         }
         return arrayNode;
 
