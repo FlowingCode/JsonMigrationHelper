@@ -19,11 +19,13 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.server.Version;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
 
@@ -112,6 +114,22 @@ public class JsonMigration {
    */
   public static void setPropertyJson(Element element, String name, JsonValue json) {
     invoke(Element_setPropertyJson, element, name, json);
+  }
+
+  /**
+   * Asynchronously runs the given JavaScript expression in the browser in the context of this
+   * element.
+   *
+   * @param element the {@code Element} on which to run the JavaScript expression
+   * @param expression the JavaScript expression to invoke
+   * @param parameters parameters to pass to the expression
+   * @return a pending result that can be used to get a value returned from the expression
+   * @see Element#executeJs(String, Serializable...)
+   */
+  public static ElementalPendingJavaScriptResult executeJs(Element element, String expression,
+      Serializable... parameters) {
+    PendingJavaScriptResult result = element.executeJs(expression, parameters);
+    return helper.convertPendingJavaScriptResult(result);
   }
 
   /**

@@ -19,10 +19,13 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import java.lang.reflect.Method;
 import elemental.json.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.experimental.Delegate;
 
 @NoArgsConstructor
 class LegacyJsonMigrationHelper implements JsonMigrationHelper {
@@ -41,6 +44,20 @@ class LegacyJsonMigrationHelper implements JsonMigrationHelper {
   @SneakyThrows
   public Object invoke(Method method, Object instance, Object... args) {
     return method.invoke(instance, args);
+  }
+
+  @Override
+  public ElementalPendingJavaScriptResult convertPendingJavaScriptResult(
+      PendingJavaScriptResult result) {
+    return new PendingJavaScriptResultImpl(result);
+  }
+
+  @SuppressWarnings("serial")
+  @AllArgsConstructor
+  private static final class PendingJavaScriptResultImpl
+      implements ElementalPendingJavaScriptResult, PendingJavaScriptResult {
+    @Delegate
+    private final PendingJavaScriptResult delegate;
   }
 
 }
