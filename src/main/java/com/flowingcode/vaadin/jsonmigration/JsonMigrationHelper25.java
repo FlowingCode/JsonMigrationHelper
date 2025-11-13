@@ -21,10 +21,13 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
+import com.vaadin.flow.function.SerializableConsumer;
 import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import tools.jackson.databind.JsonNode;
@@ -133,6 +136,33 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
       default:
         throw new IllegalArgumentException("Unsupported JsonValue type: " + jsonValue.getType());
     }
+  }
+
+
+  @Override
+  public ElementalPendingJavaScriptResult convertPendingJavaScriptResult(
+      PendingJavaScriptResult result) {
+    return new PendingJavaScriptResultImpl(result);
+  }
+
+  @SuppressWarnings("serial")
+  @AllArgsConstructor
+  private static final class PendingJavaScriptResultImpl
+      implements ElementalPendingJavaScriptResult {
+    private final PendingJavaScriptResult delegate;
+
+    @SuppressWarnings("rawtypes")
+    private static SerializableConsumer wrap(SerializableConsumer<JsonValue> resultHandler) {
+      return (SerializableConsumer<JsonNode>) node -> resultHandler.accept(convertToJsonValue(node));
+    };
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void then(SerializableConsumer<JsonValue> resultHandler,
+        SerializableConsumer<String> errorHandler) {
+      delegate.then(wrap(resultHandler), errorHandler);
+    }
+
   }
 
 }

@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import elemental.json.JsonValue;
 
 import java.lang.reflect.Method;
@@ -29,5 +30,7 @@ interface JsonMigrationHelper {
   JsonValue convertToJsonValue(Object object);
 
   Object invoke(Method method, Object instance, Object... args);
-  
+
+  ElementalPendingJavaScriptResult convertPendingJavaScriptResult(PendingJavaScriptResult result);
+
 }
