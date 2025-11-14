@@ -36,8 +36,10 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.function.SerializableConsumer;
+import com.vaadin.flow.internal.JsonCodec;
 import elemental.json.JsonValue;
 import java.io.Serializable;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * A pending result from a JavaScript snippet sent to the browser for evaluation. This interface
@@ -85,6 +87,96 @@ public interface ElementalPendingJavaScriptResult extends Serializable {
      */
     default void then(SerializableConsumer<JsonValue> resultHandler) {
         then(resultHandler, null);
+    }
+
+    /**
+     * Adds a typed handler that will be run for a successful execution and a
+     * handler that will be run for a failed execution. One of the handlers will
+     * be invoked asynchronously when the result of the execution is sent back
+     * to the server.
+     * <p>
+     * Handlers can only be added before the execution has been sent to the
+     * browser.
+     *
+     * @param targetType
+     *            the type to convert the JavaScript return value to, not
+     *            <code>null</code>
+     * @param resultHandler
+     *            a handler for the return value from a successful execution,
+     *            not <code>null</code>
+     * @param errorHandler
+     *            a handler for an error message in case the execution failed,
+     *            or <code>null</code> to ignore errors
+     */
+    default <T> void then(Class<T> targetType,
+            SerializableConsumer<T> resultHandler,
+            SerializableConsumer<String> errorHandler) {
+        if (targetType == null) {
+            throw new IllegalArgumentException("Target type cannot be null");
+        }
+        if (resultHandler == null) {
+            throw new IllegalArgumentException("Result handler cannot be null");
+        }
+
+        SerializableConsumer<JsonValue> convertingResultHandler = value -> resultHandler
+                .accept(JsonCodec.decodeAs(value, targetType));
+
+        then(convertingResultHandler, errorHandler);
+    }
+
+    /**
+     * Adds a typed handler that will be run for a successful execution. The
+     * handler will be invoked asynchronously if the execution was successful.
+     * In case of a failure, no handler will be run.
+     * <p>
+     * A handler can only be added before the execution has been sent to the
+     * browser.
+     *
+     * @param targetType
+     *            the type to convert the JavaScript return value to, not
+     *            <code>null</code>
+     * @param resultHandler
+     *            a handler for the return value from a successful execution,
+     *            not <code>null</code>
+     */
+    default <T> void then(Class<T> targetType,
+            SerializableConsumer<T> resultHandler) {
+        then(targetType, resultHandler, null);
+    }
+
+    /**
+     * Creates a typed completable future that will be completed with the result
+     * of the execution. It will be completed asynchronously when the result of
+     * the execution is sent back to the server. It is not possible to
+     * synchronously wait for the result of the execution while holding the
+     * session lock since the request handling thread that makes the result
+     * available will also need to lock the session.
+     * <p>
+     * A completable future can only be created before the execution has been
+     * sent to the browser.
+     *
+     * @param targetType
+     *            the type to convert the JavaScript return value to, not
+     *            <code>null</code>
+     *
+     * @return a completable future that will be completed based on the
+     *         execution results, not <code>null</code>
+     */
+    <T> CompletableFuture<T> toCompletableFuture(Class<T> targetType);
+
+    /**
+     * Creates an untyped completable future that will be completed with the
+     * result of the execution. It will be completed asynchronously when the
+     * result of the execution is sent back to the server.
+     * <p>
+     * A completable future can only be created before the execution has been
+     * sent to the browser.
+     *
+     * @return a completable future that will be completed based on the
+     *         execution results, not <code>null</code>
+     */
+    default CompletableFuture<JsonValue> toCompletableFuture() {
+        return toCompletableFuture(JsonValue.class);
     }
 
 }

@@ -27,6 +27,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -156,11 +157,38 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
       return (SerializableConsumer<JsonNode>) node -> resultHandler.accept(convertToJsonValue(node));
     };
 
+    private static <T> T decodeAs(JsonNode node, Class<T> type) {
+      return JsonCodec.decodeAs(convertToJsonValue(node), type);
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void then(SerializableConsumer<JsonValue> resultHandler,
         SerializableConsumer<String> errorHandler) {
       delegate.then(wrap(resultHandler), errorHandler);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> void then(Class<T> targetType, SerializableConsumer<T> resultHandler,
+        SerializableConsumer<String> errorHandler) {
+      if (targetType != null && JsonValue.class.isAssignableFrom(targetType)) {
+        delegate.then(JsonNode.class, wrap(value->{
+          resultHandler.accept(JsonCodec.decodeAs(value, targetType));
+        }), errorHandler);
+      } else {
+        delegate.then(targetType, resultHandler, errorHandler);
+      }
+    }
+
+    @Override
+    public <T> CompletableFuture<T> toCompletableFuture(Class<T> targetType) {
+      if (JsonValue.class.isAssignableFrom(targetType)) {
+        return delegate.toCompletableFuture(JsonNode.class)
+            .thenApply(node -> decodeAs(node, targetType));
+      } else {
+        return delegate.toCompletableFuture(targetType);
+      }
     }
 
   }
