@@ -27,6 +27,7 @@ import elemental.json.Json;
 import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
+import java.lang.reflect.Array;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -58,7 +59,18 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
   @SneakyThrows
   public Object invoke(Method method, Object instance, Object... args) {
     Object[] convertedArgs = null;
+
+    int j = args.length - 1;
     Class<?> parameterTypes[] = method.getParameterTypes();
+    if (method.isVarArgs() && j >= 0 && args[j] instanceof Object[]) {
+      Object[] convertedArray =
+          convertArray((Object[]) args[j], parameterTypes[j].getComponentType());
+      if (convertedArray != null) {
+        convertedArgs = Arrays.copyOf(args, args.length);
+        convertedArgs[j] = convertedArray;
+      }
+    }
+
     for (int i = 0; i < parameterTypes.length; i++) {
       if (args[i] instanceof JsonValue && parameterTypes[i] == BaseJsonNode.class) {
         
@@ -72,6 +84,33 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
       convertedArgs = args;
     }
     return method.invoke(instance, convertedArgs);
+  }
+
+
+  private static <T> T[] convertArray(Object[] array, Class<? extends T> newType) {
+    T[] convertedArray = null;
+    if (newType.isAssignableFrom(BaseJsonNode.class)) {
+      for (int i = 0; i < array.length; i++) {
+        if (array[i] instanceof JsonValue) {
+          if (convertedArray == null) {
+            @SuppressWarnings("unchecked")
+            T[] copy = (newType == Object.class)
+                ? (T[]) new Object[array.length]
+                : (T[]) Array.newInstance(newType, array.length);
+            if (i>0) {
+              System.arraycopy(array, 0, copy, 0, i);
+            }
+            convertedArray = copy;
+          }
+          @SuppressWarnings("unchecked")
+          T t = (T) convertToJsonNode((JsonValue) array[i]);
+          convertedArray[i] = t;
+        } else if (convertedArray != null) {
+          convertedArray[i] = newType.cast(array[i]);
+        }
+      }
+    }
+    return convertedArray;
   }
 
   private static JsonValue convertToJsonValue(JsonNode jsonNode) {
