@@ -62,24 +62,27 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
 
     int j = args.length - 1;
     Class<?> parameterTypes[] = method.getParameterTypes();
-    if (method.isVarArgs() && j >= 0 && args[j] instanceof Object[]) {
-      Object[] convertedArray =
-          convertArray((Object[]) args[j], parameterTypes[j].getComponentType());
-      if (convertedArray != null) {
-        convertedArgs = Arrays.copyOf(args, args.length);
-        convertedArgs[j] = convertedArray;
+    if (args.length == parameterTypes.length) {
+      if (method.isVarArgs() && args[j] instanceof Object[]) {
+        Object[] convertedArray =
+            convertArray((Object[]) args[j], parameterTypes[j].getComponentType());
+        if (convertedArray != null) {
+          convertedArgs = Arrays.copyOf(args, args.length);
+          convertedArgs[j] = convertedArray;
+        }
+      }
+
+      for (int i = 0; i < parameterTypes.length; i++) {
+        if (args[i] instanceof JsonValue && parameterTypes[i] == BaseJsonNode.class) {
+
+          if (convertedArgs == null) {
+            convertedArgs = Arrays.copyOf(args, args.length);
+          }
+          convertedArgs[i] = convertToJsonNode((JsonValue) args[i]);
+        }
       }
     }
 
-    for (int i = 0; i < parameterTypes.length; i++) {
-      if (args[i] instanceof JsonValue && parameterTypes[i] == BaseJsonNode.class) {
-        
-        if (convertedArgs == null) {
-          convertedArgs = Arrays.copyOf(args, args.length);
-        }
-        convertedArgs[i] = convertToJsonNode((JsonValue) args[i]);
-      }
-    }
     if (convertedArgs == null) {
       convertedArgs = args;
     }
