@@ -116,6 +116,17 @@ public class JsonMigration {
     invoke(Element_setPropertyJson, element, name, json);
   }
 
+  private static Method Element_executeJs = lookup_executeJs();
+
+  @SneakyThrows
+  private static Method lookup_executeJs() {
+    if (Version.getMajorVersion() > 24) {
+      return Element.class.getMethod("executeJs", String.class, Object[].class);
+    } else {
+      return Element.class.getMethod("executeJs", String.class, Serializable[].class);
+    }
+  }
+
   /**
    * Asynchronously runs the given JavaScript expression in the browser in the context of this
    * element.
@@ -128,7 +139,8 @@ public class JsonMigration {
    */
   public static ElementalPendingJavaScriptResult executeJs(Element element, String expression,
       Serializable... parameters) {
-    PendingJavaScriptResult result = element.executeJs(expression, parameters);
+    PendingJavaScriptResult result =
+        (PendingJavaScriptResult) invoke(Element_executeJs, element, expression, parameters);
     return helper.convertPendingJavaScriptResult(result);
   }
 
