@@ -39,6 +39,11 @@ class LegacyJsonMigrationHelper implements JsonMigrationHelper {
           object.getClass().getName() + " cannot be converted to elemental.json.JsonObject");
     }
   }
+  
+  @Override
+  public Object convertToClientCallableResult(Object object) {
+    return object;
+  }
 
   @Override
   @SneakyThrows

@@ -56,6 +56,15 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
   } 
 
   @Override
+  public Object convertToClientCallableResult(Object object) {
+    if (object instanceof JsonValue) {
+      return convertToJsonNode((JsonValue) object);
+    } else {
+      return object;
+    }
+  }
+
+  @Override
   @SneakyThrows
   public Object invoke(Method method, Object instance, Object... args) {
     Object[] convertedArgs = null;
