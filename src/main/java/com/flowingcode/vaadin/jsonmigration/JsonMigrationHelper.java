@@ -29,6 +29,8 @@ interface JsonMigrationHelper {
 
   JsonValue convertToJsonValue(Object object);
 
+  Object convertToClientCallableResult(Object object);
+
   Object invoke(Method method, Object instance, Object... args);
 
   ElementalPendingJavaScriptResult convertPendingJavaScriptResult(PendingJavaScriptResult result);

@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
@@ -63,6 +64,18 @@ public class JsonMigration {
     }
   } 
   
+  /**
+   * Converts a given Java object into the return type of a {@link ClientCallable method}.
+   *
+   * In Vaadin 25, this method converts {@code JsonValue} into {@code JsonNode}.
+   *
+   * @param object the object to convert
+   * @return an {@code Object} suitable to use as the result of a {@code ClientCallable} method.
+   */
+  public static Object convertToClientCallableResult(Object object) {
+    return helper.convertToClientCallableResult(object);
+  }
+
   /**
    * Converts a given Java object into a {@code JsonValue}.
    *
