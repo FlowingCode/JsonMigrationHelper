@@ -55,12 +55,28 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
     }
   } 
 
+  @SuppressWarnings("unchecked")
   @Override
-  public Object convertToClientCallableResult(Object object) {
-    if (object instanceof JsonValue) {
-      return convertToJsonNode((JsonValue) object);
+  public JsonValue convertToClientCallableResult(JsonValue object) {
+    if (object == null) {
+      return null;
     } else {
-      return object;
+      switch (object.getType()) {
+        case OBJECT:
+          return new ElementalObjectNode((JsonObject) object);
+        case ARRAY:
+          return new ElementalArrayNode((JsonArray) object);
+        case BOOLEAN:
+          return new ElementalBooleanNode(object.asBoolean());
+        case NULL:
+          return new ElementalNullNode();
+        case NUMBER:
+          return new ElementalNumberNode(object.asNumber());
+        case STRING:
+          return new ElementalStringNode(object.asString());
+        default:
+          throw new IllegalArgumentException();
+      }
     }
   }
 
@@ -155,7 +171,7 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
 
   private static final JsonNodeFactory nodeFactory = JsonNodeFactory.instance;
 
-  private static BaseJsonNode convertToJsonNode(JsonValue jsonValue) {
+  static BaseJsonNode convertToJsonNode(JsonValue jsonValue) {
     switch (jsonValue.getType()) {
       case OBJECT:
         JsonObject jsonObject = (JsonObject) jsonValue;

@@ -72,7 +72,7 @@ public class JsonMigration {
    * @param object the object to convert
    * @return an {@code Object} suitable to use as the result of a {@code ClientCallable} method.
    */
-  public static Object convertToClientCallableResult(Object object) {
+  public static <T extends JsonValue> T convertToClientCallableResult(T object) {
     return helper.convertToClientCallableResult(object);
   }
 
