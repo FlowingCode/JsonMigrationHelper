@@ -41,7 +41,7 @@ class LegacyJsonMigrationHelper implements JsonMigrationHelper {
   }
   
   @Override
-  public Object convertToClientCallableResult(Object object) {
+  public <T extends JsonValue> T convertToClientCallableResult(T object) {
     return object;
   }
 
