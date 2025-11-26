@@ -6,7 +6,7 @@
 
     <groupId>com.flowingcode.vaadin</groupId>
     <artifactId>json-migration-helper</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.9.0-SNAPSHOT</version>
     <name>Json Migration Helper</name>
     <description>Json Migration Helper for Vaadin Flow</description>
     <url>https://www.flowingcode.com/en/open-source/</url>
