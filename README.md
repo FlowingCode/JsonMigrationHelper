@@ -10,7 +10,10 @@ Provides a compatibility layer for JSON handling to abstract away breaking chang
 
 ## Features
 
-Detects the runtime version and uses version-specific helpers to ensure that code calling its methods does not need to be aware of underlying Vaadin API changes.
+- **Zero-effort migration**: Write your code once and run it seamlessly on Vaadin 14, 23, 24 and 25
+- **Automatic version detection**: Detects the runtime Vaadin version and uses the appropriate JSON handling strategy
+- **Drop-in replacement**: Simple static methods that replace version-specific APIs
+
 
 ## Download release
 
@@ -84,9 +87,68 @@ Json Migration Helper is written by Flowing Code S.A.
 
 # Developer Guide
 
-## Getting started
+## Using Lombok @ExtensionMethod
 
-Add your code samples in this section
+The `JsonMigration` class is designed to be used with Lombok's `@ExtensionMethod` annotation. This allows you to call the helper methods as if they were instance methods of `Element` or `DomEvent`:
+
+```java
+import com.flowingcode.vaadin.jsonmigration.JsonMigration;
+import lombok.experimental.ExtensionMethod;
+
+@ExtensionMethod(JsonMigration.class)
+public class MyComponent extends Div {
+   
+   public MyComponent() {
+       getElement().setPropertyJson("property", jsonValue);
+       
+       getElement().executeJs("console.log($0)", jsonValue)
+          .then(json->{ ... });
+       
+       getElement().addEventListener("click", event -> {
+           JsonObject eventData = event.getEventData();
+       });
+   }
+}
+```
+
+## Returning JSON from ClientCallable methods
+
+When a `@ClientCallable` method needs to return a JSON value, use `convertToClientCallableResult` to ensure compatibility across Vaadin versions:
+
+```java
+@ClientCallable
+public Object getJsonData() {
+    JsonValue json = ...;
+    return JsonMigration.convertToClientCallableResult(json);
+}
+```
+
+## Direct Usage
+
+The helper methods can also be used directly from the `JsonMigration` class:
+
+```java
+import com.flowingcode.vaadin.jsonmigration.JsonMigration;
+import elemental.json.Json;
+import elemental.json.JsonValue;
+
+// ...
+
+// 1. Setting a JSON Property
+JsonValue json = Json.createObject();
+// ... populate json
+JsonMigration.setPropertyJson(element, "property", json);
+
+// 2. Executing JavaScript
+JsonMigration.executeJs(element, "console.log($0)", "Hello World");
+
+// 3. Getting Event Data
+element.addEventListener("click", event -> {
+    JsonObject eventData = JsonMigration.getEventData(event);
+    // ...
+}).addEventData("event.detail");
+```
+
 
 ## Special configuration when using Spring
 
