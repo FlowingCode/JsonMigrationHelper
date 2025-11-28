@@ -36,7 +36,10 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.dom.Element;
+import com.vaadin.flow.dom.Node;
 import com.vaadin.flow.internal.ReflectTools;
+import com.vaadin.flow.internal.nodefeature.ReturnChannelRegistration;
+import elemental.json.Json;
 import elemental.json.JsonType;
 import elemental.json.JsonValue;
 
@@ -58,7 +61,7 @@ import elemental.json.JsonValue;
  * <p>
  * @author Vaadin Ltd
  */
-class JsonCodec {
+public class JsonCodec {
 
     /**
      * Decodes the given JSON value as the given type.
@@ -99,6 +102,54 @@ class JsonCodec {
                     "Unknown type " + type.getName());
         }
 
+    }
+
+    /**
+     * Helper for checking whether the type is supported by
+     * {@link #encodeWithoutTypeInfo(Object)}. Supported value types are
+     * {@link String}, {@link Integer}, {@link Double}, {@link Boolean},
+     * {@link JsonValue}.
+     *
+     * @param type
+     *            the type to check
+     * @return whether the type can be encoded
+     */
+    public static boolean canEncodeWithoutTypeInfo(Class<?> type) {
+      assert type != null;
+      return String.class.equals(type) || Integer.class.equals(type)
+              || Double.class.equals(type) || Boolean.class.equals(type)
+              || JsonValue.class.isAssignableFrom(type);
+    }
+
+    /**
+     * Helper for encoding any "primitive" value that is directly supported in
+     * JSON. Supported values types are {@link String}, {@link Number},
+     * {@link Boolean}, {@link JsonValue}. <code>null</code> is also supported.
+     *
+     * @param value
+     *            the value to encode
+     * @return the value encoded as JSON
+     */
+    public static JsonValue encodeWithoutTypeInfo(Object value) {
+        if (value == null) {
+            return Json.createNull();
+        }
+
+        assert canEncodeWithoutTypeInfo(value.getClass());
+
+        Class<?> type = value.getClass();
+        if (String.class.equals(value.getClass())) {
+            return Json.create((String) value);
+        } else if (Integer.class.equals(type) || Double.class.equals(type)) {
+            return Json.create(((Number) value).doubleValue());
+        } else if (Boolean.class.equals(type)) {
+            return Json.create(((Boolean) value).booleanValue());
+        } else if (JsonValue.class.isAssignableFrom(type)) {
+            return (JsonValue) value;
+        }
+        assert !canEncodeWithoutTypeInfo(type);
+        throw new IllegalArgumentException(
+                "Can't encode " + value.getClass() + " to json");
     }
 
 }
