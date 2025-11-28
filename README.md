@@ -13,6 +13,8 @@ Provides a compatibility layer for JSON handling to abstract away breaking chang
 - **Zero-effort migration**: Write your code once and run it seamlessly on Vaadin 14, 23, 24 and 25
 - **Automatic version detection**: Detects the runtime Vaadin version and uses the appropriate JSON handling strategy
 - **Drop-in replacement**: Simple static methods that replace version-specific APIs
+- **Client Callable compatibility**: Mechanisms to handle JSON arguments and return types in `@ClientCallable` methods.
+- **JsonSerializer and JsonCodec**: Includes `JsonSerializer` and `JsonCodec` classes for serialization and deserialization of elemental JSON values.
 
 
 ## Download release
@@ -117,9 +119,36 @@ When a `@ClientCallable` method needs to return a JSON value, use `convertToClie
 
 ```java
 @ClientCallable
-public Object getJsonData() {
+public JsonValue getJsonData() {
     JsonValue json = ...;
     return JsonMigration.convertToClientCallableResult(json);
+}
+```
+
+## Receiving JSON in ClientCallable methods
+
+If the method receives `JsonValue` as an argument, it cannot be annotated with `ClientCallable` because of compatibility issues. `LegacyClientCallable` should be used instead.
+
+To use `LegacyClientCallable`, you must use instrumentation. This can be done via `JsonMigration.instrumentClass` or by using `InstrumentedRoute` / `InstrumentationViewInitializer`.
+
+**Note:** Instrumentation is a complex mechanism. While it might warrant a rewrite of the affected code, it is offered here to preserve compatibility with existing implementations.
+
+```java
+@InstrumentedRoute("legacy-view")
+public class ViewWithElementalCallables extends Div {
+    @LegacyClientCallable
+    public void receiveJson(JsonValue json) {
+        // ...
+    }
+}
+
+// Register via META-INF/services/com.vaadin.flow.server.VaadinServiceInitListener
+// or use `@SpringComponent` with Spring.
+public class ViewInitializerImpl extends InstrumentationViewInitializer {
+  @Override
+  public void serviceInit(ServiceInitEvent event) {
+    registerInstrumentedRoute(ViewWithElementalCallables.class);
+  }
 }
 ```
 
