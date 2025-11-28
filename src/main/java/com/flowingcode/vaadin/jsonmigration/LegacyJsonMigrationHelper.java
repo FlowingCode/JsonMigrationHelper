@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import java.lang.reflect.Method;
 import elemental.json.JsonValue;
@@ -29,6 +30,11 @@ import lombok.experimental.Delegate;
 
 @NoArgsConstructor
 class LegacyJsonMigrationHelper implements JsonMigrationHelper {
+
+  @Override
+  public <T extends Component> Class<T> instrumentClass(Class<T> clazz) {
+    return clazz;
+  }
 
   @Override
   public JsonValue convertToJsonValue(Object object) {
