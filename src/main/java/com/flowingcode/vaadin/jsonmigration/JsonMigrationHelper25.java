@@ -21,6 +21,7 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.function.SerializableConsumer;
 import elemental.json.Json;
@@ -40,6 +41,11 @@ import tools.jackson.databind.node.ObjectNode;
 
 @NoArgsConstructor
 class JsonMigrationHelper25 implements JsonMigrationHelper {
+
+  @Override
+  public <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
+    return ClassInstrumentationUtil.instrumentClass(clazz);
+  }
 
   @Override
   public JsonValue convertToJsonValue(Object object) {

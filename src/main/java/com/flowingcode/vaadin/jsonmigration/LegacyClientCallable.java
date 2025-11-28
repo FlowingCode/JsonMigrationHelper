@@ -19,23 +19,19 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import elemental.json.JsonValue;
+import com.vaadin.flow.component.ClientCallable;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.lang.reflect.Method;
-import com.vaadin.flow.dom.Element;
-
-interface JsonMigrationHelper {
-
-  JsonValue convertToJsonValue(Object object);
-
-  <T extends JsonValue> T convertToClientCallableResult(T object);
-
-  Object invoke(Method method, Object instance, Object... args);
-
-  ElementalPendingJavaScriptResult convertPendingJavaScriptResult(PendingJavaScriptResult result);
-
-  <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz);
+/**
+ * When instrumented, publishes the annotated method as if {@link ClientCallable} has been used.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Documented
+public @interface LegacyClientCallable {
 
 }

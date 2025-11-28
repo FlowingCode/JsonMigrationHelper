@@ -20,6 +20,7 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.dom.Element;
@@ -166,6 +167,42 @@ public class JsonMigration {
    */
   public static JsonObject getEventData(DomEvent event) {
     return (JsonObject) convertToJsonValue(invoke(DomEvent_getEventData, event));
+  }
+
+  /**
+   * Instruments a component class to ensure compatibility with Vaadin 25+ JSON handling changes 
+   * in {@link ClientCallable} methods.
+   *
+   * <p>
+   * This method creates a dynamically generated subclass of the given component class that
+   * automatically converts {@code JsonValue} return values from {@link ClientCallable} methods to
+   * the appropriate {@code JsonNode} type required by Vaadin 25+.
+   *
+   * <p>
+   * <b>Behavior by Vaadin version:</b>
+   * <ul>
+   * <li><b>Vaadin 25+:</b> Returns an instrumented subclass that overrides all
+   * {@code @ClientCallable} methods returning {@code JsonValue} types. These overridden methods
+   * call the parent implementation and then convert the result through
+   * {@link #convertToClientCallableResult(JsonValue)} to ensure compatibility with the new
+   * Jackson-based JSON API.</li>
+   * <li><b>Vaadin 24 and earlier:</b> Returns the original class unchanged, as no instrumentation
+   * is needed for the elemental.json API.</li>
+   * </ul>
+   *
+   * @param <T> the type of the component class
+   * @param clazz the component class to instrument
+   * @return in Vaadin 25+, an instrumented subclass of {@code clazz}; in earlier versions, the
+   *         original {@code clazz}
+   * @throws IllegalArgumentException if the class does not meet the requirements for
+   *         instrumentation
+   * @throws RuntimeException if the instrumentation fails
+   * @see ClientCallable
+   * @see InstrumentedRoute
+   * @see #convertToClientCallableResult(JsonValue)
+   */
+  public static <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
+    return helper.instrumentClass(clazz);
   }
 
 }
