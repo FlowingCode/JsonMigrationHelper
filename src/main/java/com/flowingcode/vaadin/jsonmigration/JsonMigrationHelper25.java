@@ -42,9 +42,11 @@ import tools.jackson.databind.node.ObjectNode;
 @NoArgsConstructor
 class JsonMigrationHelper25 implements JsonMigrationHelper {
 
+  private static final ClassInstrumentationUtil instrumentation = new ClassInstrumentationUtil(25);
+
   @Override
   public <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
-    return ClassInstrumentationUtil.instrumentClass(clazz);
+    return instrumentation.instrumentClass(clazz);
   }
 
   @Override

@@ -31,9 +31,11 @@ import lombok.experimental.Delegate;
 @NoArgsConstructor
 class LegacyJsonMigrationHelper implements JsonMigrationHelper {
 
+  private static final ClassInstrumentationUtil instrumentation = new ClassInstrumentationUtil(24);
+
   @Override
-  public <T extends Component> Class<T> instrumentClass(Class<T> clazz) {
-    return clazz;
+  public <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
+    return instrumentation.instrumentClass(clazz);
   }
 
   @Override
