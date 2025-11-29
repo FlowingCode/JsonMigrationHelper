@@ -30,12 +30,12 @@ import elemental.json.JsonValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import lombok.experimental.UtilityClass;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -59,11 +59,15 @@ import tools.jackson.databind.node.StringNode;
  *
  * @author Javier Godoy / Flowing Code
  */
-@UtilityClass
 final class ClassInstrumentationUtil {
 
-  private static final Map<ClassLoader, InstrumentedClassLoader> classLoaderCache =
-      new WeakHashMap<>();
+  private final int version;
+
+  private static final Map<ClassLoader, InstrumentedClassLoader> classLoaderCache = new WeakHashMap<>();
+
+  ClassInstrumentationUtil(int version) {
+    this.version = version;
+  }
 
   /**
    * Creates and returns an instance of a dynamically instrumented class that extends the specified
@@ -144,34 +148,54 @@ final class ClassInstrumentationUtil {
     }
   }
 
-  private static boolean needsInstrumentation(Class<?> parent) {
+  private boolean needsInstrumentation(Class<?> parent) {
     return !getInstrumentableMethods(parent).isEmpty();
   }
 
-  private static List<Method> getInstrumentableMethods(Class<?> parent) {
-    List<Method> methods = new ArrayList<>();
-    for (Method method : parent.getDeclaredMethods()) {
-      if (!Modifier.isStatic(method.getModifiers()) && !Modifier.isPrivate(method.getModifiers())) {
+  private boolean hasLegacyVaadin() {
+    return version <= 24;
+  }
+
+  private static Stream<Method> getDeclaredCallables(Class<?> parent) {
+    return Stream.of(parent.getDeclaredMethods()).filter(method -> {
+      int modifiers = method.getModifiers();
+      if (!Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
         boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
         boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
-        if (isCallable || isLegacyCallable) {
-          boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
-          boolean hasJsonValueParams = hasJsonValueParameters(method);
+        return isCallable || isLegacyCallable;
+      }
+      return false;
+    });
+  }
 
-          if (isCallable && hasJsonValueParams) {
-            throw new IllegalArgumentException(String.format(
-                "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
-                method.getName(), method.getDeclaringClass().getName(),
-                LegacyClientCallable.class.getName()));
-          } else if (isCallable && hasJsonValueReturn) {
-            methods.add(method);
-          } else if (isLegacyCallable) {
-            methods.add(method);
-          }
+  private List<Method> getInstrumentableMethods(Class<?> parent) {
+    return getDeclaredCallables(parent).filter(method -> {
+      boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
+      boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
+
+      if (hasLegacyVaadin()) {
+        return isLegacyCallable;
+      }
+
+      if (isCallable || isLegacyCallable) {
+        boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
+        boolean hasJsonValueParams = hasJsonValueParameters(method);
+
+        if (isCallable && hasJsonValueParams) {
+          throw new IllegalArgumentException(String.format(
+              "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
+              method.getName(), method.getDeclaringClass().getName(),
+              LegacyClientCallable.class.getName()));
+        } else if (isCallable && hasJsonValueReturn) {
+          return true;
+        } else if (isLegacyCallable) {
+          return true;
         }
       }
-    }
-    return methods;
+
+      return false;
+
+    }).collect(Collectors.toList());
   }
 
   private static boolean hasJsonValueParameters(Method method) {
@@ -185,8 +209,7 @@ final class ClassInstrumentationUtil {
 
   private <T extends Component> Class<? extends T> createInstrumentedClass(Class<T> parent,
       String className) throws Exception {
-    InstrumentedClassLoader classLoader =
-        getOrCreateInstrumentedClassLoader(parent.getClassLoader());
+    InstrumentedClassLoader classLoader = getOrCreateInstrumentedClassLoader(parent.getClassLoader());
     return classLoader.defineInstrumentedClass(className, parent).asSubclass(parent);
   }
 
@@ -196,7 +219,7 @@ final class ClassInstrumentationUtil {
     }
   }
 
-  private static final class InstrumentedClassLoader extends ClassLoader {
+  private final class InstrumentedClassLoader extends ClassLoader {
 
     private final Map<Class<?>, Class<?>> instrumentedClassCache = new ConcurrentHashMap<>();
 
@@ -244,8 +267,8 @@ final class ClassInstrumentationUtil {
     }
 
     private void generateMethodOverride(ClassWriter cw, Method method, String internalParentName) {
-      boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
-      boolean hasJsonValueParams = hasJsonValueParameters(method);
+      boolean hasJsonValueReturn = !hasLegacyVaadin() && JsonValue.class.isAssignableFrom(method.getReturnType());
+      boolean hasJsonValueParams = !hasLegacyVaadin() && hasJsonValueParameters(method);
 
       String overrideDescriptor = getMethodDescriptor(method, hasJsonValueParams);
       String superDescriptor = getMethodDescriptor(method, false);
@@ -300,7 +323,7 @@ final class ClassInstrumentationUtil {
             false);
       }
 
-      // Return converted result or void
+      // Return result or void
       if (method.getReturnType() == Void.TYPE) {
         mv.visitInsn(Opcodes.RETURN);
       } else {
