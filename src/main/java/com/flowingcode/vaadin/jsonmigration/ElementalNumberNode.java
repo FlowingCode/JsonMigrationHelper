@@ -28,5 +28,14 @@ class ElementalNumberNode extends DoubleNode implements UnsupportedJsonValueImpl
     super(value);
   }
 
+  @Override
+  public String toJson() {
+    double value = doubleValue();
+    if (value == (long) value) {
+      return String.valueOf((long) value);
+    } else {
+      return UnsupportedJsonValueImpl.super.toJson();
+    }
+  }
 }
 

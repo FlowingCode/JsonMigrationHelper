@@ -28,5 +28,10 @@ class ElementalNullNode extends NullNode implements UnsupportedJsonValueImpl {
     super();
   }
 
+  @Override
+  public String toJson() {
+    return null;
+  }
+
 }
 
