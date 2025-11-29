@@ -326,6 +326,16 @@ final class ClassInstrumentationUtil {
       // Return result or void
       if (method.getReturnType() == Void.TYPE) {
         mv.visitInsn(Opcodes.RETURN);
+      } else if (method.getReturnType().isPrimitive()) {
+        if (method.getReturnType() == Long.TYPE) {
+          mv.visitInsn(Opcodes.LRETURN);
+        } else if (method.getReturnType() == Float.TYPE) {
+          mv.visitInsn(Opcodes.FRETURN);
+        } else if (method.getReturnType() == Double.TYPE) {
+          mv.visitInsn(Opcodes.DRETURN);
+        } else {
+          mv.visitInsn(Opcodes.IRETURN);
+        }
       } else {
         mv.visitInsn(Opcodes.ARETURN);
       }
