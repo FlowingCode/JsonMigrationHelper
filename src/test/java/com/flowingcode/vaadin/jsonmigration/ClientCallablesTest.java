@@ -1,0 +1,266 @@
+package com.flowingcode.vaadin.jsonmigration;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import com.vaadin.flow.component.ClientCallable;
+import com.vaadin.flow.component.Component;
+import elemental.json.JsonValue;
+import java.lang.reflect.Method;
+import org.junit.Test;
+
+public abstract class ClientCallablesTest {
+
+  protected abstract <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz);
+
+  private static final String MESSAGE = "instrumented method is not annotated with @ClientCallable";
+
+  /**
+   * Finds the test method declared in the instrumented class that is annotated
+   * with @ClientCallable.
+   *
+   * @param c the instrumented callable instance
+   * @return the Method if found, null otherwise
+   */
+  protected static Method getClientCallableTestMethod(Class<? extends Component> clazz) {
+    for (Method method : clazz.getDeclaredMethods()) {
+      if ("test".equals(method.getName()) && method.isAnnotationPresent(ClientCallable.class)) {
+        return method;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Invokes the test method on the instrumented instance via reflection.
+   *
+   * @param instrumented the instrumented instance
+   * @param args         the arguments to pass to the test method
+   * @return the result of the method invocation
+   * @throws Exception if invocation fails
+   */
+  private Object invokeTestMethod(BaseClientCallable instrumented, Object... args)
+      throws Exception {
+    Method testMethod = getClientCallableTestMethod(instrumented.getClass());
+    assertTrue(MESSAGE, testMethod != null);
+    return testMethod.invoke(instrumented, args);
+  }
+
+  protected abstract Object createJsonNull();
+
+  protected abstract Object createJsonBoolean();
+
+  protected abstract Object createJsonNumber();
+
+  protected abstract Object createJsonString();
+
+  protected abstract Object createJsonArray();
+
+  protected abstract Object createJsonObject();
+
+  @Test
+  public void test__V() throws Exception {
+    ClientCallable__V instrumented = instrumentClass(ClientCallable__V.class).getDeclaredConstructor()
+        .newInstance();
+    invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_Z__V() throws Exception {
+    ClientCallable_Z__V instrumented = instrumentClass(ClientCallable_Z__V.class).getDeclaredConstructor()
+        .newInstance();
+    invokeTestMethod(instrumented, true);
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_I__V() throws Exception {
+    ClientCallable_I__V instrumented = instrumentClass(ClientCallable_I__V.class).getDeclaredConstructor()
+        .newInstance();
+    invokeTestMethod(instrumented, 42);
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_D__V() throws Exception {
+    ClientCallable_D__V instrumented = instrumentClass(ClientCallable_D__V.class).getDeclaredConstructor()
+        .newInstance();
+    invokeTestMethod(instrumented, 3.14);
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_String__V() throws Exception {
+    ClientCallable_String__V instrumented = instrumentClass(ClientCallable_String__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, "test");
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test__Z() throws Exception {
+    ClientCallable__Z instrumented = instrumentClass(ClientCallable__Z.class).getDeclaredConstructor()
+        .newInstance();
+    ClientCallable__Z nonInstrumented = new ClientCallable__Z();
+    boolean result = (boolean) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test(), result);
+  }
+
+  @Test
+  public void test__I() throws Exception {
+    ClientCallable__I instrumented = instrumentClass(ClientCallable__I.class).getDeclaredConstructor()
+        .newInstance();
+    ClientCallable__I nonInstrumented = new ClientCallable__I();
+    int result = (int) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test(), result);
+  }
+
+  @Test
+  public void test__D() throws Exception {
+    ClientCallable__D instrumented = instrumentClass(ClientCallable__D.class).getDeclaredConstructor()
+        .newInstance();
+    ClientCallable__D nonInstrumented = new ClientCallable__D();
+    double result = (double) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test(), result, 0.0);
+  }
+
+  @Test
+  public void test__Integer() throws Exception {
+    ClientCallable__Integer instrumented = instrumentClass(ClientCallable__Integer.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__Integer nonInstrumented = new ClientCallable__Integer();
+    Integer result = (Integer) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test(), result);
+  }
+
+  @Test
+  public void test__JsonValue() throws Exception {
+    ClientCallable__JsonValue instrumented = instrumentClass(ClientCallable__JsonValue.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonValue nonInstrumented = new ClientCallable__JsonValue();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonBoolean() throws Exception {
+    ClientCallable__JsonBoolean instrumented = instrumentClass(ClientCallable__JsonBoolean.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonBoolean nonInstrumented = new ClientCallable__JsonBoolean();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonNumber() throws Exception {
+    ClientCallable__JsonNumber instrumented = instrumentClass(ClientCallable__JsonNumber.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonNumber nonInstrumented = new ClientCallable__JsonNumber();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonString() throws Exception {
+    ClientCallable__JsonString instrumented = instrumentClass(ClientCallable__JsonString.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonString nonInstrumented = new ClientCallable__JsonString();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonNull() throws Exception {
+    ClientCallable__JsonNull instrumented = instrumentClass(ClientCallable__JsonNull.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonNull nonInstrumented = new ClientCallable__JsonNull();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonArray() throws Exception {
+    ClientCallable__JsonArray instrumented = instrumentClass(ClientCallable__JsonArray.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonArray nonInstrumented = new ClientCallable__JsonArray();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test__JsonObject() throws Exception {
+    ClientCallable__JsonObject instrumented = instrumentClass(ClientCallable__JsonObject.class)
+        .getDeclaredConstructor().newInstance();
+    ClientCallable__JsonObject nonInstrumented = new ClientCallable__JsonObject();
+    JsonValue result = (JsonValue) invokeTestMethod(instrumented);
+    assertTrue(instrumented.hasBeenTraced());
+    assertEquals(nonInstrumented.test().toJson(), result.toJson());
+  }
+
+  @Test
+  public void test_JsonValue__V() throws Exception {
+    ClientCallable_JsonValue__V instrumented = instrumentClass(ClientCallable_JsonValue__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonNull());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonBoolean__V() throws Exception {
+    ClientCallable_JsonBoolean__V instrumented = instrumentClass(ClientCallable_JsonBoolean__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonBoolean());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonNumber__V() throws Exception {
+    ClientCallable_JsonNumber__V instrumented = instrumentClass(ClientCallable_JsonNumber__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonNumber());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonString__V() throws Exception {
+    ClientCallable_JsonString__V instrumented = instrumentClass(ClientCallable_JsonString__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonString());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonNull__V() throws Exception {
+    ClientCallable_JsonNull__V instrumented = instrumentClass(ClientCallable_JsonNull__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonNull());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonArray__V() throws Exception {
+    ClientCallable_JsonArray__V instrumented = instrumentClass(ClientCallable_JsonArray__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonArray());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_JsonObject__V() throws Exception {
+    ClientCallable_JsonObject__V instrumented = instrumentClass(ClientCallable_JsonObject__V.class)
+        .getDeclaredConstructor().newInstance();
+    invokeTestMethod(instrumented, createJsonObject());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+}
