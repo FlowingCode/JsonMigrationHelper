@@ -21,12 +21,10 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
-import elemental.json.JsonArray;
-import elemental.json.JsonBoolean;
-import elemental.json.JsonNumber;
-import elemental.json.JsonObject;
-import elemental.json.JsonString;
 import elemental.json.JsonValue;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -36,16 +34,11 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import lombok.SneakyThrows;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.node.ArrayNode;
-import tools.jackson.databind.node.BooleanNode;
-import tools.jackson.databind.node.DoubleNode;
-import tools.jackson.databind.node.ObjectNode;
-import tools.jackson.databind.node.StringNode;
 
 /**
  * Utility class for instrumenting classes at runtime.
@@ -377,21 +370,17 @@ final class ClassInstrumentationUtil {
       return sb.toString();
     }
 
+    private MethodHandle getConvertedTypeDescriptor;
+
+    @SneakyThrows
     private String getConvertedTypeDescriptor(Class<?> type) {
-      if (type == JsonObject.class) {
-        return Type.getDescriptor(ObjectNode.class);
-      } else if (type == JsonArray.class) {
-        return Type.getDescriptor(ArrayNode.class);
-      } else if (type == JsonBoolean.class) {
-        return Type.getDescriptor(BooleanNode.class);
-      } else if (type == JsonNumber.class) {
-        return Type.getDescriptor(DoubleNode.class);
-      } else if (type == JsonString.class) {
-        return Type.getDescriptor(StringNode.class);
-      } else if (JsonValue.class.isAssignableFrom(type)) {
-        return Type.getDescriptor(JsonNode.class);
+      if (getConvertedTypeDescriptor == null) {
+        Class<?> helper = Class.forName("com.flowingcode.vaadin.jsonmigration.ClassInstrumentationJacksonHelper");
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        MethodType methodType = MethodType.methodType(String.class, Class.class);
+        getConvertedTypeDescriptor = lookup.findStatic(helper, "getConvertedTypeDescriptor", methodType);
       }
-      return Type.getDescriptor(type);
+      return (String) getConvertedTypeDescriptor.invokeExact(type);
     }
 
     private String[] getExceptionInternalNames(Class<?>[] exceptionTypes) {
