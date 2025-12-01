@@ -56,7 +56,7 @@ final class ClassInstrumentationUtil {
 
   private final int version;
 
-  private static final Map<ClassLoader, InstrumentedClassLoader> classLoaderCache = new WeakHashMap<>();
+  private final Map<ClassLoader, InstrumentedClassLoader> classLoaderCache = new WeakHashMap<>();
 
   ClassInstrumentationUtil(int version) {
     this.version = version;
