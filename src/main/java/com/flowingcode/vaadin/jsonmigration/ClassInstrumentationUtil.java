@@ -28,6 +28,9 @@ import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -149,10 +152,10 @@ final class ClassInstrumentationUtil {
     return version <= 24;
   }
 
-  private static Stream<Method> getDeclaredCallables(Class<?> parent) {
-    return Stream.of(parent.getDeclaredMethods()).filter(method -> {
+  private static Stream<Method> getDeclaredCallables(Class<?> clazz) {
+    return Stream.of(clazz.getDeclaredMethods()).filter(method -> {
       int modifiers = method.getModifiers();
-      if (!Modifier.isStatic(modifiers) && !Modifier.isPrivate(modifiers)) {
+      if (!Modifier.isStatic(modifiers)) {
         boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
         boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
         return isCallable || isLegacyCallable;
@@ -161,8 +164,27 @@ final class ClassInstrumentationUtil {
     });
   }
 
+  private static Stream<Method> getAllCallables(Class<?> baseClass) {
+    Map<String, Method> map = new HashMap<>();
+    for (Class<?> clazz = baseClass; clazz != Component.class; clazz = clazz.getSuperclass()) {
+      getDeclaredCallables(clazz).forEach(method -> {
+        Method existing = map.get(method.getName());
+        if (existing == null) {
+          map.put(method.getName(), method);
+        } else if (!Arrays.equals(existing.getParameterTypes(), method.getParameterTypes())) {
+          String msg = String.format("There may be only one handler method with the given name. "
+                  + "Class '%s' (considering its superclasses) "
+                  + "contains several handler methods with the same name: '%s'",
+              baseClass.getName(), method.getName());
+          throw new IllegalStateException(msg);
+        }
+      });
+    }
+    return map.values().stream();
+  }
+
   private List<Method> getInstrumentableMethods(Class<?> parent) {
-    return getDeclaredCallables(parent).filter(method -> {
+    return getAllCallables(parent).filter(method -> {
       boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
       boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
       boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
@@ -238,7 +260,7 @@ final class ClassInstrumentationUtil {
       cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, internalClassName, null, internalParentName, null);
 
       generateConstructor(cw, internalParentName);
-      generateClientCallableOverrides(cw, parent, internalParentName);
+      generateClientCallableOverrides(cw, parent, internalClassName, internalParentName);
 
       cw.visitEnd();
       return cw.toByteArray();
@@ -255,13 +277,99 @@ final class ClassInstrumentationUtil {
     }
 
     private void generateClientCallableOverrides(ClassWriter cw, Class<?> parent,
-        String internalParentName) {
+        String internalClassName, String internalParentName) {
+      List<String> privateMethodNames = new ArrayList<>();
       for (Method method : getInstrumentableMethods(parent)) {
-        generateMethodOverride(cw, method, internalParentName);
+        if (Modifier.isPrivate(method.getModifiers())) {
+          privateMethodNames.add(method.getName());
+          createLookupHelper(cw, method);
+          cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL,
+              method.getName(),
+              Type.getDescriptor(MethodHandle.class), null, null);
+        }
+        generateMethodOverride(cw, method, internalClassName, internalParentName);
+      }
+
+      if (!privateMethodNames.isEmpty()) {
+        MethodVisitor mv = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
+        mv.visitCode();
+        for (String name : privateMethodNames) {
+          mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+              internalClassName,
+              "lookup_"+name,
+              "()"+Type.getDescriptor(MethodHandle.class),
+              false);
+          mv.visitFieldInsn(Opcodes.PUTSTATIC,
+              internalClassName, name,
+              "Ljava/lang/invoke/MethodHandle;");
+        }
+        mv.visitInsn(Opcodes.RETURN);
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
       }
     }
 
-    private void generateMethodOverride(ClassWriter cw, Method method, String internalParentName) {
+    private void createLookupHelper(ClassWriter cw, Method method) {
+      MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+          "lookup_" + method.getName(), "()" + Type.getDescriptor(MethodHandle.class), null, null);
+
+      // Invoke static MethodHandles.lookup()
+      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+          "java/lang/invoke/MethodHandles",
+          "lookup",
+          "()Ljava/lang/invoke/MethodHandles$Lookup;",
+          false);
+
+      // Load the Owner class
+      mv.visitLdcInsn(Type.getType(method.getDeclaringClass()));
+
+      // Load the Method Name
+      mv.visitLdcInsn(method.getName());
+
+      // Create Class[] array
+      Class<?> argTypes[] = method.getParameterTypes();
+      pushInt(mv, (short) argTypes.length);
+      mv.visitTypeInsn(Opcodes.ANEWARRAY, "java/lang/Class");
+
+      // Load the specific Class objects and store in array
+      for (short i = 0; i < argTypes.length; i++) {
+        mv.visitInsn(Opcodes.DUP);
+        pushInt(mv, i);
+        loadClassConstant(mv, argTypes[i]);
+        mv.visitInsn(Opcodes.AASTORE);
+      }
+
+      // Invoke getDeclaredMethod
+      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+          "java/lang/Class",
+          "getDeclaredMethod",
+          "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;",
+          false);
+
+      // Invoke method.setAccessible(true)
+      mv.visitInsn(Opcodes.DUP);
+      mv.visitInsn(Opcodes.ICONST_1);
+      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+          "java/lang/reflect/Method",
+          "setAccessible",
+          "(Z)V",
+          false);
+
+      // Invoke Lookup.unresolve(method)
+      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+          "java/lang/invoke/MethodHandles$Lookup",
+          "unreflect",
+          "(Ljava/lang/reflect/Method;)Ljava/lang/invoke/MethodHandle;",
+          false);
+
+      // Return result
+      mv.visitInsn(Opcodes.ARETURN);
+
+      mv.visitMaxs(0, 0);
+      mv.visitEnd();
+    }
+
+    private void generateMethodOverride(ClassWriter cw, Method method, String internalClassName, String internalParentName) {
       boolean hasJsonValueReturn = !hasLegacyVaadin() && JsonValue.class.isAssignableFrom(method.getReturnType());
       boolean hasJsonValueParams = !hasLegacyVaadin() && hasJsonValueParameters(method);
 
@@ -274,6 +382,14 @@ final class ClassInstrumentationUtil {
 
       mv.visitAnnotation(Type.getDescriptor(ClientCallable.class), true);
       mv.visitCode();
+
+      boolean isPrivate = Modifier.isPrivate(method.getModifiers());
+      if (isPrivate) {
+        // Load MethodHandle from static field
+        mv.visitFieldInsn(Opcodes.GETSTATIC,
+            internalClassName, method.getName(),
+            "Ljava/lang/invoke/MethodHandle;");
+      }
 
       // Load 'this'
       mv.visitVarInsn(Opcodes.ALOAD, 0);
@@ -301,9 +417,24 @@ final class ClassInstrumentationUtil {
         }
       }
 
-      // Call super.methodName(params) with original descriptor
-      mv.visitMethodInsn(Opcodes.INVOKESPECIAL, internalParentName, method.getName(), superDescriptor,
-          false);
+      if (isPrivate) {
+        // Call private method
+        String descriptor =
+            "(" + Type.getDescriptor(method.getDeclaringClass())
+            + superDescriptor.substring(1);
+        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+            "java/lang/invoke/MethodHandle",
+            "invokeExact",
+            descriptor,
+            false);
+      } else {
+        // Call super.methodName(params) with original descriptor
+        mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
+            internalParentName,
+            method.getName(),
+            superDescriptor,
+            false);
+      }
 
       if (hasJsonValueReturn) {
         // Store result in local variable
@@ -337,6 +468,42 @@ final class ClassInstrumentationUtil {
 
       mv.visitMaxs(0, 0);
       mv.visitEnd();
+    }
+
+    private void pushInt(MethodVisitor mv, short value) {
+      if (value >= -1 && value <= 5) {
+        mv.visitInsn(Opcodes.ICONST_0 + value);
+      } else if (value >= Byte.MIN_VALUE && value <= Byte.MAX_VALUE) {
+        mv.visitIntInsn(Opcodes.BIPUSH, value);
+      } else {
+        mv.visitIntInsn(Opcodes.SIPUSH, value);
+      }
+    }
+
+    private void loadClassConstant(MethodVisitor mv, Class<?> clazz) {
+      if (clazz.isPrimitive()) {
+        if (clazz == int.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Integer", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == boolean.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Boolean", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == byte.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Byte", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == char.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Character", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == short.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Short", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == float.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Float", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == long.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Long", "TYPE", "Ljava/lang/Class;");
+        } else if (clazz == double.class) {
+          mv.visitFieldInsn(Opcodes.GETSTATIC, "java/lang/Double", "TYPE", "Ljava/lang/Class;");
+        } else {
+          throw new IllegalArgumentException("Unsupported type: " + clazz);
+        }
+      } else {
+        mv.visitLdcInsn(Type.getType(clazz));
+      }
     }
 
     private int loadParameter(MethodVisitor mv, Class<?> paramType, int localVarIndex) {
