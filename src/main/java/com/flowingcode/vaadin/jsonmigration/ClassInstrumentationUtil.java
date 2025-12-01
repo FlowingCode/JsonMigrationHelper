@@ -165,21 +165,23 @@ final class ClassInstrumentationUtil {
     return getDeclaredCallables(parent).filter(method -> {
       boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
       boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
+      boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
+      boolean hasJsonValueParams = hasJsonValueParameters(method);
+
+      if (isCallable && hasJsonValueParams) {
+        throw new IllegalArgumentException(String.format(
+            "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
+            method.getName(), method.getDeclaringClass(),
+            LegacyClientCallable.class.getSimpleName()));
+      }
 
       if (hasLegacyVaadin()) {
         return isLegacyCallable;
       }
 
       if (isCallable || isLegacyCallable) {
-        boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
-        boolean hasJsonValueParams = hasJsonValueParameters(method);
 
-        if (isCallable && hasJsonValueParams) {
-          throw new IllegalArgumentException(String.format(
-              "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
-              method.getName(), method.getDeclaringClass().getName(),
-              LegacyClientCallable.class.getName()));
-        } else if (isCallable && hasJsonValueReturn) {
+        if (isCallable && hasJsonValueReturn) {
           return true;
         } else if (isLegacyCallable) {
           return true;
