@@ -199,18 +199,9 @@ final class ClassInstrumentationUtil {
 
       if (hasLegacyVaadin()) {
         return isLegacyCallable;
+      } else {
+        return (isCallable && hasJsonValueReturn) || isLegacyCallable;
       }
-
-      if (isCallable || isLegacyCallable) {
-
-        if (isCallable && hasJsonValueReturn) {
-          return true;
-        } else if (isLegacyCallable) {
-          return true;
-        }
-      }
-
-      return false;
 
     }).collect(Collectors.toList());
   }
