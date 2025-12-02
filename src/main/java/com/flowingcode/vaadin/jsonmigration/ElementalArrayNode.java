@@ -20,6 +20,7 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import elemental.json.JsonArray;
+import elemental.json.JsonType;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +48,11 @@ class ElementalArrayNode extends ArrayNode implements UnsupportedJsonValueImpl {
         }
         return children;
     }
+  }
+
+  @Override
+  public JsonType getType() {
+    return JsonType.ARRAY;
   }
 
 }

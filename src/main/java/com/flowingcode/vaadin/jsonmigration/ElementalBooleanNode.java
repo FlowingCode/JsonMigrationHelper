@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import elemental.json.JsonType;
 import tools.jackson.databind.node.BooleanNode;
 
 @SuppressWarnings("serial")
@@ -26,6 +27,11 @@ class ElementalBooleanNode extends BooleanNode implements UnsupportedJsonValueIm
 
   public ElementalBooleanNode(boolean value) {
     super(value);
+  }
+
+  @Override
+  public JsonType getType() {
+    return JsonType.BOOLEAN;
   }
 
 }

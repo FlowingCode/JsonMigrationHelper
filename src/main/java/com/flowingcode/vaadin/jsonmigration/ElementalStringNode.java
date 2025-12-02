@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import elemental.json.JsonType;
 import tools.jackson.databind.node.StringNode;
 
 @SuppressWarnings("serial")
@@ -26,6 +27,11 @@ class ElementalStringNode extends StringNode implements UnsupportedJsonValueImpl
 
   public ElementalStringNode(String value) {
     super(value);
+  }
+
+  @Override
+  public JsonType getType() {
+    return JsonType.STRING;
   }
 
 }
