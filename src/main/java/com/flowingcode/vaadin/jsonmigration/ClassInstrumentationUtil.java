@@ -42,6 +42,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for instrumenting classes at runtime.
@@ -56,6 +58,8 @@ import org.objectweb.asm.Type;
  * @author Javier Godoy / Flowing Code
  */
 final class ClassInstrumentationUtil {
+
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   private final int version;
 
@@ -115,6 +119,7 @@ final class ClassInstrumentationUtil {
     }
 
     if (!needsInstrumentation(parent)) {
+      logger.info("{} no instrumentation needed", parent);
       return parent;
     }
 
@@ -362,6 +367,8 @@ final class ClassInstrumentationUtil {
     }
 
     private void generateMethodOverride(ClassWriter cw, Method method, String internalClassName, String internalParentName) {
+      logger.info("Override {}", method);
+
       boolean hasJsonValueReturn = !hasLegacyVaadin() && JsonValue.class.isAssignableFrom(method.getReturnType());
       boolean hasJsonValueParams = !hasLegacyVaadin() && hasJsonValueParameters(method);
 
