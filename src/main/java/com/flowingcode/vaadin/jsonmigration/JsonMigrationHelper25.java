@@ -66,8 +66,8 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
   @SuppressWarnings("unchecked")
   @Override
   public JsonValue convertToClientCallableResult(JsonValue object) {
-    if (object == null) {
-      return null;
+    if (object == null || object instanceof JsonNode) {
+      return object;
     } else {
       switch (object.getType()) {
         case OBJECT:
