@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import elemental.json.JsonType;
 import tools.jackson.databind.node.DoubleNode;
 
 @SuppressWarnings("serial")
@@ -37,5 +38,11 @@ class ElementalNumberNode extends DoubleNode implements UnsupportedJsonValueImpl
       return UnsupportedJsonValueImpl.super.toJson();
     }
   }
+
+  @Override
+  public JsonType getType() {
+    return JsonType.NUMBER;
+  }
+
 }
 

@@ -19,7 +19,6 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
-import elemental.json.JsonType;
 import elemental.json.JsonValue;
 import tools.jackson.databind.JsonNode;
 
@@ -37,11 +36,6 @@ interface UnsupportedJsonValueImpl extends JsonValue {
 
   @Override
   default String asString() {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  default JsonType getType() {
     throw new UnsupportedOperationException();
   }
 

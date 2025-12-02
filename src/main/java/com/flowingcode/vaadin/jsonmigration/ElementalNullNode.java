@@ -19,6 +19,7 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import elemental.json.JsonType;
 import tools.jackson.databind.node.NullNode;
 
 @SuppressWarnings("serial")
@@ -31,6 +32,11 @@ class ElementalNullNode extends NullNode implements UnsupportedJsonValueImpl {
   @Override
   public String toJson() {
     return null;
+  }
+
+  @Override
+  public JsonType getType() {
+    return JsonType.NULL;
   }
 
 }
