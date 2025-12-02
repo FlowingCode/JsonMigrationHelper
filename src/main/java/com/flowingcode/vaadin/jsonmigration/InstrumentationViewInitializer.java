@@ -22,7 +22,6 @@ package com.flowingcode.vaadin.jsonmigration;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.VaadinServiceInitListener;
-import com.vaadin.flow.server.Version;
 
 /**
  * Abstract base class for Vaadin service initializers that register instrumented views. Subclasses
@@ -54,9 +53,7 @@ public abstract class InstrumentationViewInitializer implements VaadinServiceIni
     }
 
     String route = annotation.value();
-    if (Version.getMajorVersion() > 24) {
-      navigationTarget = JsonMigration.instrumentClass(navigationTarget);
-    }
+    navigationTarget = JsonMigration.instrumentClass(navigationTarget);
     RouteConfiguration.forApplicationScope().setRoute(route, navigationTarget);
   }
 
