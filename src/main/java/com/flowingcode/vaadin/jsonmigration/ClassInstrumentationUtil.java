@@ -367,7 +367,7 @@ final class ClassInstrumentationUtil {
 
       String overrideDescriptor = getMethodDescriptor(method, hasJsonValueParams);
       String superDescriptor = getMethodDescriptor(method, false);
-      int access = method.getModifiers() & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED);
+      int access = method.getModifiers() & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
 
       MethodVisitor mv = cw.visitMethod(access, method.getName(), overrideDescriptor, null,
           getExceptionInternalNames(method.getExceptionTypes()));
