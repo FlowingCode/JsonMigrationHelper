@@ -248,7 +248,8 @@ final class ClassInstrumentationUtil {
 
       ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-      cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC, internalClassName, null, internalParentName, null);
+      cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
+          internalClassName, null, internalParentName, null);
 
       generateConstructor(cw, internalParentName);
       generateClientCallableOverrides(cw, parent, internalClassName, internalParentName);
