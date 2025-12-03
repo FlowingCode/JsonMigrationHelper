@@ -37,7 +37,6 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.internal.JsonCodec;
 import elemental.json.JsonValue;
 import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
