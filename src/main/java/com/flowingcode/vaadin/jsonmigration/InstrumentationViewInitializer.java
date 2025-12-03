@@ -25,8 +25,8 @@ import com.vaadin.flow.server.VaadinServiceInitListener;
 
 /**
  * Abstract base class for Vaadin service initializers that register instrumented views. Subclasses
- * should implement {@link #serviceInit(com.vaadin.flow.server.ServiceInitEvent)} and call
- * {@link #registerInstrumentedRoute(Class)} to register views with instrumented routes.
+ * should implement {@link #serviceInit(com.vaadin.flow.server.ServiceInitEvent)} and call {@link
+ * #registerInstrumentedRoute(Class)} to register views with instrumented routes.
  *
  * @author Javier Godoy / Flowing Code
  */
@@ -35,20 +35,21 @@ public abstract class InstrumentationViewInitializer implements VaadinServiceIni
 
   /**
    * Registers an instrumented route for the given navigation target. The navigation target must be
-   * annotated with {@link InstrumentedRoute} to specify the route path. This method calls
-   * {@link JsonMigration#instrumentClass(Class)} to get the instrumented class and registers it as
-   * a Vaadin view with the route derived from the annotation.
+   * annotated with {@link InstrumentedRoute} to specify the route path. This method calls {@link
+   * JsonMigration#instrumentClass(Class)} to get the instrumented class and registers it as a
+   * Vaadin view with the route derived from the annotation.
    *
    * @param navigationTarget the component class to instrument and register, must be annotated with
-   *        {@link InstrumentedRoute}
-   * @throws IllegalArgumentException if the navigationTarget is not annotated with
-   *         {@link InstrumentedRoute}
+   *     {@link InstrumentedRoute}
+   * @throws IllegalArgumentException if the navigationTarget is not annotated with {@link
+   *     InstrumentedRoute}
    */
   protected final void registerInstrumentedRoute(Class<? extends Component> navigationTarget) {
     InstrumentedRoute annotation = navigationTarget.getAnnotation(InstrumentedRoute.class);
     if (annotation == null) {
       throw new IllegalArgumentException(
-          navigationTarget.getName() + " must be annotated with @"
+          navigationTarget.getName()
+              + " must be annotated with @"
               + InstrumentedRoute.class.getSimpleName());
     }
 
@@ -56,5 +57,4 @@ public abstract class InstrumentationViewInitializer implements VaadinServiceIni
     navigationTarget = JsonMigration.instrumentClass(navigationTarget);
     RouteConfiguration.forApplicationScope().setRoute(route, navigationTarget);
   }
-
 }

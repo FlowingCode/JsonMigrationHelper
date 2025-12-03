@@ -33,12 +33,4 @@ class ElementalBooleanNode extends BooleanNode implements UnsupportedJsonValueIm
   public JsonType getType() {
     return JsonType.BOOLEAN;
   }
-
 }
-
-
-
-
-
-
-

@@ -53,5 +53,4 @@ interface UnsupportedJsonValueImpl extends JsonValue {
   default Object toNative() {
     throw new UnsupportedOperationException();
   }
-
 }

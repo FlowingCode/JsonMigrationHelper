@@ -42,5 +42,4 @@ public @interface InstrumentedRoute {
    * @return the route path
    */
   String value();
-
 }

@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,8 +21,8 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import java.lang.reflect.Method;
 import elemental.json.JsonValue;
+import java.lang.reflect.Method;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
@@ -47,7 +47,7 @@ class LegacyJsonMigrationHelper implements JsonMigrationHelper {
           object.getClass().getName() + " cannot be converted to elemental.json.JsonObject");
     }
   }
-  
+
   @Override
   public <T extends JsonValue> T convertToClientCallableResult(T object) {
     return object;
@@ -69,8 +69,6 @@ class LegacyJsonMigrationHelper implements JsonMigrationHelper {
   @AllArgsConstructor
   private static final class PendingJavaScriptResultImpl
       implements ElementalPendingJavaScriptResult, PendingJavaScriptResult {
-    @Delegate
-    private final PendingJavaScriptResult delegate;
+    @Delegate private final PendingJavaScriptResult delegate;
   }
-
 }

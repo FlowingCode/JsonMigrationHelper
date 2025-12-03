@@ -48,12 +48,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Utility class for instrumenting classes at runtime.
  *
- * <p>
- * This class provides methods to dynamically create subclasses of a given parent class using
+ * <p>This class provides methods to dynamically create subclasses of a given parent class using
  * bytecode instrumentation. Methods annotated with {@link ClientCallable} that return a type
- * assignable to {@link JsonValue} are automatically overridden to convert the result through
- * {@link JsonMigration#convertToClientCallableResult(JsonValue)}.
- * </p>
+ * assignable to {@link JsonValue} are automatically overridden to convert the result through {@link
+ * JsonMigration#convertToClientCallableResult(JsonValue)}.
  *
  * @author Javier Godoy / Flowing Code
  */
@@ -70,8 +68,8 @@ final class ClassInstrumentationUtil {
   static {
     boolean isPresent;
     try {
-      Class.forName("org.objectweb.asm.ClassWriter", false,
-          ClassInstrumentationUtil.class.getClassLoader());
+      Class.forName(
+          "org.objectweb.asm.ClassWriter", false, ClassInstrumentationUtil.class.getClassLoader());
       isPresent = true;
     } catch (ClassNotFoundException e) {
       isPresent = false;
@@ -87,27 +85,24 @@ final class ClassInstrumentationUtil {
    * Creates and returns an instance of a dynamically instrumented class that extends the specified
    * parent class.
    *
-   * <p>
-   * This method generates a new class at runtime that extends {@code parent}, and returns a new
+   * <p>This method generates a new class at runtime that extends {@code parent}, and returns a new
    * instance of that generated class. The instrumented class will have a default constructor that
-   * delegates to the parent's default constructor. All methods annotated with
-   * {@link ClientCallable} that return a type assignable to {@link JsonValue} will be overridden to
+   * delegates to the parent's default constructor. All methods annotated with {@link
+   * ClientCallable} that return a type assignable to {@link JsonValue} will be overridden to
    * convert the result via JsonMigration.convertClientCallableResult().
-   * </p>
    *
-   * <p>
-   * <b>Requirements:</b>
-   * </p>
+   * <p><b>Requirements:</b>
+   *
    * <ul>
-   * <li>The parent class must not be final</li>
-   * <li>The parent class must have an accessible no-argument constructor</li>
+   *   <li>The parent class must not be final
+   *   <li>The parent class must have an accessible no-argument constructor
    * </ul>
    *
-   * @param <T>    the type of the parent class
+   * @param <T> the type of the parent class
    * @param parent the parent class to extend
    * @return a new instance of the instrumented class extending {@code parent}
    * @throws IllegalArgumentException if the parent class is final, an interface, a primitive type,
-   *         an array type, or does not have an accessible no-argument constructor
+   *     an array type, or does not have an accessible no-argument constructor
    * @throws RuntimeException if the instrumentation or instantiation fails
    */
   public <T extends Component> Class<? extends T> instrumentClass(Class<T> parent) {
@@ -176,57 +171,68 @@ final class ClassInstrumentationUtil {
   }
 
   private static Stream<Method> getDeclaredCallables(Class<?> clazz) {
-    return Stream.of(clazz.getDeclaredMethods()).filter(method -> {
-      int modifiers = method.getModifiers();
-      if (!Modifier.isStatic(modifiers)) {
-        boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
-        boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
-        return isCallable || isLegacyCallable;
-      }
-      return false;
-    });
+    return Stream.of(clazz.getDeclaredMethods())
+        .filter(
+            method -> {
+              int modifiers = method.getModifiers();
+              if (!Modifier.isStatic(modifiers)) {
+                boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
+                boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
+                return isCallable || isLegacyCallable;
+              }
+              return false;
+            });
   }
 
   private static Stream<Method> getAllCallables(Class<?> baseClass) {
     Map<String, Method> map = new HashMap<>();
     for (Class<?> clazz = baseClass; clazz != Component.class; clazz = clazz.getSuperclass()) {
-      getDeclaredCallables(clazz).forEach(method -> {
-        Method existing = map.get(method.getName());
-        if (existing == null) {
-          map.put(method.getName(), method);
-        } else if (!Arrays.equals(existing.getParameterTypes(), method.getParameterTypes())) {
-          String msg = String.format("There may be only one handler method with the given name. "
-                  + "Class '%s' (considering its superclasses) "
-                  + "contains several handler methods with the same name: '%s'",
-              baseClass.getName(), method.getName());
-          throw new IllegalStateException(msg);
-        }
-      });
+      getDeclaredCallables(clazz)
+          .forEach(
+              method -> {
+                Method existing = map.get(method.getName());
+                if (existing == null) {
+                  map.put(method.getName(), method);
+                } else if (!Arrays.equals(
+                    existing.getParameterTypes(), method.getParameterTypes())) {
+                  String msg =
+                      String.format(
+                          "There may be only one handler method with the given name. "
+                              + "Class '%s' (considering its superclasses) "
+                              + "contains several handler methods with the same name: '%s'",
+                          baseClass.getName(), method.getName());
+                  throw new IllegalStateException(msg);
+                }
+              });
     }
     return map.values().stream();
   }
 
   private List<Method> getInstrumentableMethods(Class<?> parent) {
-    return getAllCallables(parent).filter(method -> {
-      boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
-      boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
-      boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
-      boolean hasJsonValueParams = hasJsonValueParameters(method);
+    return getAllCallables(parent)
+        .filter(
+            method -> {
+              boolean isCallable = method.isAnnotationPresent(ClientCallable.class);
+              boolean isLegacyCallable = method.isAnnotationPresent(LegacyClientCallable.class);
+              boolean hasJsonValueReturn = JsonValue.class.isAssignableFrom(method.getReturnType());
+              boolean hasJsonValueParams = hasJsonValueParameters(method);
 
-      if (isCallable && hasJsonValueParams) {
-        throw new IllegalArgumentException(String.format(
-            "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
-            method.getName(), method.getDeclaringClass(),
-            LegacyClientCallable.class.getSimpleName()));
-      }
+              if (isCallable && hasJsonValueParams) {
+                throw new IllegalArgumentException(
+                    String.format(
+                        "Instrumented method '%s' in class '%s' has JsonValue arguments and must be annotated with @%s instead of @ClientCallable",
+                        method.getName(),
+                        method.getDeclaringClass(),
+                        LegacyClientCallable.class.getSimpleName()));
+              }
 
-      if (hasLegacyVaadin()) {
-        return isLegacyCallable;
-      } else {
-        return (isCallable && hasJsonValueReturn) || isLegacyCallable;
-      }
-
-    }).collect(Collectors.toList());
+              if (hasLegacyVaadin()) {
+                return isLegacyCallable;
+              } else {
+                return (isCallable && hasJsonValueReturn) || isLegacyCallable;
+              }
+            })
+        .collect(Collectors.toList());
   }
 
   private static boolean hasJsonValueParameters(Method method) {
@@ -238,9 +244,10 @@ final class ClassInstrumentationUtil {
     return false;
   }
 
-  private <T extends Component> Class<? extends T> createInstrumentedClass(Class<T> parent,
-      String className) throws Exception {
-    InstrumentedClassLoader classLoader = getOrCreateInstrumentedClassLoader(parent.getClassLoader());
+  private <T extends Component> Class<? extends T> createInstrumentedClass(
+      Class<T> parent, String className) throws Exception {
+    InstrumentedClassLoader classLoader =
+        getOrCreateInstrumentedClassLoader(parent.getClassLoader());
     return classLoader.defineInstrumentedClass(className, parent).asSubclass(parent);
   }
 
@@ -259,10 +266,12 @@ final class ClassInstrumentationUtil {
     }
 
     public Class<?> defineInstrumentedClass(String className, Class<?> parent) {
-      return instrumentedClassCache.computeIfAbsent(parent, p -> {
-        byte[] bytecode = generateBytecode(className, p);
-        return defineClass(className, bytecode, 0, bytecode.length);
-      });
+      return instrumentedClassCache.computeIfAbsent(
+          parent,
+          p -> {
+            byte[] bytecode = generateBytecode(className, p);
+            return defineClass(className, bytecode, 0, bytecode.length);
+          });
     }
 
     private byte[] generateBytecode(String className, Class<?> parent) {
@@ -271,8 +280,13 @@ final class ClassInstrumentationUtil {
 
       ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
 
-      cw.visit(Opcodes.V1_8, Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
-          internalClassName, null, internalParentName, null);
+      cw.visit(
+          Opcodes.V1_8,
+          Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
+          internalClassName,
+          null,
+          internalParentName,
+          null);
 
       generateConstructor(cw, internalParentName);
       generateClientCallableOverrides(cw, parent, internalClassName, internalParentName);
@@ -291,16 +305,19 @@ final class ClassInstrumentationUtil {
       mv.visitEnd();
     }
 
-    private void generateClientCallableOverrides(ClassWriter cw, Class<?> parent,
-        String internalClassName, String internalParentName) {
+    private void generateClientCallableOverrides(
+        ClassWriter cw, Class<?> parent, String internalClassName, String internalParentName) {
       List<String> privateMethodNames = new ArrayList<>();
       for (Method method : getInstrumentableMethods(parent)) {
         if (Modifier.isPrivate(method.getModifiers())) {
           privateMethodNames.add(method.getName());
           createLookupHelper(cw, method);
-          cw.visitField(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL,
+          cw.visitField(
+              Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_FINAL,
               method.getName(),
-              Type.getDescriptor(MethodHandle.class), null, null);
+              Type.getDescriptor(MethodHandle.class),
+              null,
+              null);
         }
         generateMethodOverride(cw, method, internalClassName, internalParentName);
       }
@@ -309,14 +326,14 @@ final class ClassInstrumentationUtil {
         MethodVisitor mv = cw.visitMethod(Opcodes.ACC_STATIC, "<clinit>", "()V", null, null);
         mv.visitCode();
         for (String name : privateMethodNames) {
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+          mv.visitMethodInsn(
+              Opcodes.INVOKESTATIC,
               internalClassName,
-              "lookup_"+name,
-              "()"+Type.getDescriptor(MethodHandle.class),
+              "lookup_" + name,
+              "()" + Type.getDescriptor(MethodHandle.class),
               false);
-          mv.visitFieldInsn(Opcodes.PUTSTATIC,
-              internalClassName, name,
-              "Ljava/lang/invoke/MethodHandle;");
+          mv.visitFieldInsn(
+              Opcodes.PUTSTATIC, internalClassName, name, "Ljava/lang/invoke/MethodHandle;");
         }
         mv.visitInsn(Opcodes.RETURN);
         mv.visitMaxs(0, 0);
@@ -325,11 +342,17 @@ final class ClassInstrumentationUtil {
     }
 
     private void createLookupHelper(ClassWriter cw, Method method) {
-      MethodVisitor mv = cw.visitMethod(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
-          "lookup_" + method.getName(), "()" + Type.getDescriptor(MethodHandle.class), null, null);
+      MethodVisitor mv =
+          cw.visitMethod(
+              Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC,
+              "lookup_" + method.getName(),
+              "()" + Type.getDescriptor(MethodHandle.class),
+              null,
+              null);
 
       // Invoke static MethodHandles.lookup()
-      mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+      mv.visitMethodInsn(
+          Opcodes.INVOKESTATIC,
           "java/lang/invoke/MethodHandles",
           "lookup",
           "()Ljava/lang/invoke/MethodHandles$Lookup;",
@@ -355,7 +378,8 @@ final class ClassInstrumentationUtil {
       }
 
       // Invoke getDeclaredMethod
-      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+      mv.visitMethodInsn(
+          Opcodes.INVOKEVIRTUAL,
           "java/lang/Class",
           "getDeclaredMethod",
           "(Ljava/lang/String;[Ljava/lang/Class;)Ljava/lang/reflect/Method;",
@@ -364,14 +388,12 @@ final class ClassInstrumentationUtil {
       // Invoke method.setAccessible(true)
       mv.visitInsn(Opcodes.DUP);
       mv.visitInsn(Opcodes.ICONST_1);
-      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
-          "java/lang/reflect/Method",
-          "setAccessible",
-          "(Z)V",
-          false);
+      mv.visitMethodInsn(
+          Opcodes.INVOKEVIRTUAL, "java/lang/reflect/Method", "setAccessible", "(Z)V", false);
 
       // Invoke Lookup.unresolve(method)
-      mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+      mv.visitMethodInsn(
+          Opcodes.INVOKEVIRTUAL,
           "java/lang/invoke/MethodHandles$Lookup",
           "unreflect",
           "(Ljava/lang/reflect/Method;)Ljava/lang/invoke/MethodHandle;",
@@ -384,18 +406,27 @@ final class ClassInstrumentationUtil {
       mv.visitEnd();
     }
 
-    private void generateMethodOverride(ClassWriter cw, Method method, String internalClassName, String internalParentName) {
+    private void generateMethodOverride(
+        ClassWriter cw, Method method, String internalClassName, String internalParentName) {
       logger.info("Override {}", method);
 
-      boolean hasJsonValueReturn = !hasLegacyVaadin() && JsonValue.class.isAssignableFrom(method.getReturnType());
+      boolean hasJsonValueReturn =
+          !hasLegacyVaadin() && JsonValue.class.isAssignableFrom(method.getReturnType());
       boolean hasJsonValueParams = !hasLegacyVaadin() && hasJsonValueParameters(method);
 
       String overrideDescriptor = getMethodDescriptor(method, hasJsonValueParams);
       String superDescriptor = getMethodDescriptor(method, false);
-      int access = method.getModifiers() & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
+      int access =
+          method.getModifiers()
+              & (Opcodes.ACC_PUBLIC | Opcodes.ACC_PROTECTED | Opcodes.ACC_PRIVATE);
 
-      MethodVisitor mv = cw.visitMethod(access, method.getName(), overrideDescriptor, null,
-          getExceptionInternalNames(method.getExceptionTypes()));
+      MethodVisitor mv =
+          cw.visitMethod(
+              access,
+              method.getName(),
+              overrideDescriptor,
+              null,
+              getExceptionInternalNames(method.getExceptionTypes()));
 
       mv.visitAnnotation(Type.getDescriptor(ClientCallable.class), true);
       mv.visitCode();
@@ -403,8 +434,10 @@ final class ClassInstrumentationUtil {
       boolean isPrivate = Modifier.isPrivate(method.getModifiers());
       if (isPrivate) {
         // Load MethodHandle from static field
-        mv.visitFieldInsn(Opcodes.GETSTATIC,
-            internalClassName, method.getName(),
+        mv.visitFieldInsn(
+            Opcodes.GETSTATIC,
+            internalClassName,
+            method.getName(),
             "Ljava/lang/invoke/MethodHandle;");
       }
 
@@ -420,8 +453,12 @@ final class ClassInstrumentationUtil {
           mv.visitVarInsn(Opcodes.ALOAD, localVarIndex);
 
           // Call JsonMigration.convertToJsonValue(JsonNode) -> JsonValue
-          mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/flowingcode/vaadin/jsonmigration/JsonMigration",
-              "convertToJsonValue", "(Ljava/lang/Object;)Lelemental/json/JsonValue;", false);
+          mv.visitMethodInsn(
+              Opcodes.INVOKESTATIC,
+              "com/flowingcode/vaadin/jsonmigration/JsonMigration",
+              "convertToJsonValue",
+              "(Ljava/lang/Object;)Lelemental/json/JsonValue;",
+              false);
 
           // Cast to the original type if not JsonValue
           if (paramType != JsonValue.class) {
@@ -437,20 +474,17 @@ final class ClassInstrumentationUtil {
       if (isPrivate) {
         // Call private method
         String descriptor =
-            "(" + Type.getDescriptor(method.getDeclaringClass())
-            + superDescriptor.substring(1);
-        mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
+            "(" + Type.getDescriptor(method.getDeclaringClass()) + superDescriptor.substring(1);
+        mv.visitMethodInsn(
+            Opcodes.INVOKEVIRTUAL,
             "java/lang/invoke/MethodHandle",
             "invokeExact",
             descriptor,
             false);
       } else {
         // Call super.methodName(params) with original descriptor
-        mv.visitMethodInsn(Opcodes.INVOKESPECIAL,
-            internalParentName,
-            method.getName(),
-            superDescriptor,
-            false);
+        mv.visitMethodInsn(
+            Opcodes.INVOKESPECIAL, internalParentName, method.getName(), superDescriptor, false);
       }
 
       if (hasJsonValueReturn) {
@@ -461,8 +495,11 @@ final class ClassInstrumentationUtil {
         mv.visitVarInsn(Opcodes.ALOAD, localVarIndex);
 
         // Call JsonMigration.convertToClientCallableResult(aux)
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC, "com/flowingcode/vaadin/jsonmigration/JsonMigration",
-            "convertToClientCallableResult", "(Lelemental/json/JsonValue;)Lelemental/json/JsonValue;",
+        mv.visitMethodInsn(
+            Opcodes.INVOKESTATIC,
+            "com/flowingcode/vaadin/jsonmigration/JsonMigration",
+            "convertToClientCallableResult",
+            "(Lelemental/json/JsonValue;)Lelemental/json/JsonValue;",
             false);
       }
 
@@ -561,10 +598,12 @@ final class ClassInstrumentationUtil {
     @SneakyThrows
     private String getConvertedTypeDescriptor(Class<?> type) {
       if (getConvertedTypeDescriptor == null) {
-        Class<?> helper = Class.forName("com.flowingcode.vaadin.jsonmigration.ClassInstrumentationJacksonHelper");
+        Class<?> helper =
+            Class.forName("com.flowingcode.vaadin.jsonmigration.ClassInstrumentationJacksonHelper");
         MethodHandles.Lookup lookup = MethodHandles.lookup();
         MethodType methodType = MethodType.methodType(String.class, Class.class);
-        getConvertedTypeDescriptor = lookup.findStatic(helper, "getConvertedTypeDescriptor", methodType);
+        getConvertedTypeDescriptor =
+            lookup.findStatic(helper, "getConvertedTypeDescriptor", methodType);
       }
       return (String) getConvertedTypeDescriptor.invokeExact(type);
     }
