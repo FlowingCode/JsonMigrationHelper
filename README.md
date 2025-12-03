@@ -36,13 +36,6 @@ Add the following dependencies in your pom.xml file:
 
 Release versions are available from Maven Central repository. For SNAPSHOT versions see [here](https://maven.flowingcode.com/snapshots/).
 
-## Building and running demo
-
-- git clone repository
-- mvn clean install jetty:run
-
-To see the demo, navigate to http://localhost:8080/
-
 ## Release notes
 
 See [here](https://github.com/FlowingCode/JsonMigrationHelper/releases)
