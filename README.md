@@ -27,7 +27,7 @@ Add the following dependencies in your pom.xml file:
 
 ```xml
 <dependency>
-   <groupId>com.flowingcode.vaadin.addons</groupId>
+   <groupId>com.flowingcode.vaadin</groupId>
    <artifactId>json-migration-helper</artifactId>
    <version>X.Y.Z</version>
 </dependency>
