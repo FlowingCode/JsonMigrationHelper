@@ -54,6 +54,4 @@ class ElementalArrayNode extends ArrayNode implements UnsupportedJsonValueImpl {
   public JsonType getType() {
     return JsonType.ARRAY;
   }
-
 }
-

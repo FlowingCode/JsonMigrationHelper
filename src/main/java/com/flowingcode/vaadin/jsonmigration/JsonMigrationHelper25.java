@@ -7,9 +7,9 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -19,8 +19,6 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.function.SerializableConsumer;
@@ -29,6 +27,8 @@ import elemental.json.JsonArray;
 import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -61,7 +61,7 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
       throw new ClassCastException(
           object.getClass().getName() + " cannot be converted to elemental.json.JsonObject");
     }
-  } 
+  }
 
   @SuppressWarnings("unchecked")
   @Override
@@ -122,7 +122,6 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
     return method.invoke(instance, convertedArgs);
   }
 
-
   private static <T> T[] convertArray(Object[] array, Class<? extends T> newType) {
     T[] convertedArray = null;
     if (newType.isAssignableFrom(BaseJsonNode.class)) {
@@ -130,10 +129,11 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
         if (array[i] instanceof JsonValue) {
           if (convertedArray == null) {
             @SuppressWarnings("unchecked")
-            T[] copy = (newType == Object.class)
-                ? (T[]) new Object[array.length]
-                : (T[]) Array.newInstance(newType, array.length);
-            if (i>0) {
+            T[] copy =
+                (newType == Object.class)
+                    ? (T[]) new Object[array.length]
+                    : (T[]) Array.newInstance(newType, array.length);
+            if (i > 0) {
               System.arraycopy(array, 0, copy, 0, i);
             }
             convertedArray = copy;
@@ -214,7 +214,6 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
     }
   }
 
-
   @Override
   public ElementalPendingJavaScriptResult convertPendingJavaScriptResult(
       PendingJavaScriptResult result) {
@@ -229,8 +228,10 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
 
     @SuppressWarnings("rawtypes")
     private static SerializableConsumer wrap(SerializableConsumer<JsonValue> resultHandler) {
-      return (SerializableConsumer<JsonNode>) node -> resultHandler.accept(convertToJsonValue(node));
-    };
+      return (SerializableConsumer<JsonNode>)
+          node -> resultHandler.accept(convertToJsonValue(node));
+    }
+    ;
 
     private static <T> T decodeAs(JsonNode node, Class<T> type) {
       return JsonCodec.decodeAs(convertToJsonValue(node), type);
@@ -238,19 +239,25 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void then(SerializableConsumer<JsonValue> resultHandler,
-        SerializableConsumer<String> errorHandler) {
+    public void then(
+        SerializableConsumer<JsonValue> resultHandler, SerializableConsumer<String> errorHandler) {
       delegate.then(wrap(resultHandler), errorHandler);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> void then(Class<T> targetType, SerializableConsumer<T> resultHandler,
+    public <T> void then(
+        Class<T> targetType,
+        SerializableConsumer<T> resultHandler,
         SerializableConsumer<String> errorHandler) {
       if (targetType != null && JsonValue.class.isAssignableFrom(targetType)) {
-        delegate.then(JsonNode.class, wrap(value->{
-          resultHandler.accept(JsonCodec.decodeAs(value, targetType));
-        }), errorHandler);
+        delegate.then(
+            JsonNode.class,
+            wrap(
+                value -> {
+                  resultHandler.accept(JsonCodec.decodeAs(value, targetType));
+                }),
+            errorHandler);
       } else {
         delegate.then(targetType, resultHandler, errorHandler);
       }
@@ -259,13 +266,12 @@ class JsonMigrationHelper25 implements JsonMigrationHelper {
     @Override
     public <T> CompletableFuture<T> toCompletableFuture(Class<T> targetType) {
       if (JsonValue.class.isAssignableFrom(targetType)) {
-        return delegate.toCompletableFuture(JsonNode.class)
+        return delegate
+            .toCompletableFuture(JsonNode.class)
             .thenApply(node -> decodeAs(node, targetType));
       } else {
         return delegate.toCompletableFuture(targetType);
       }
     }
-
   }
-
 }

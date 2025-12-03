@@ -33,5 +33,4 @@ class ElementalStringNode extends StringNode implements UnsupportedJsonValueImpl
   public JsonType getType() {
     return JsonType.STRING;
   }
-
 }

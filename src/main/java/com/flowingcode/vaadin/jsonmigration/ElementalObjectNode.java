@@ -20,6 +20,7 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import static com.flowingcode.vaadin.jsonmigration.JsonMigrationHelper25.convertToJsonNode;
+
 import elemental.json.JsonObject;
 import elemental.json.JsonType;
 import java.util.Collections;
@@ -56,7 +57,4 @@ class ElementalObjectNode extends ObjectNode implements UnsupportedJsonValueImpl
   public JsonType getType() {
     return JsonType.OBJECT;
   }
-
 }
-
-

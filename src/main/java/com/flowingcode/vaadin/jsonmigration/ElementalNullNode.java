@@ -38,6 +38,4 @@ class ElementalNullNode extends NullNode implements UnsupportedJsonValueImpl {
   public JsonType getType() {
     return JsonType.NULL;
   }
-
 }
-

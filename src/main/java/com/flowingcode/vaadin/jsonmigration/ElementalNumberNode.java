@@ -43,6 +43,4 @@ class ElementalNumberNode extends DoubleNode implements UnsupportedJsonValueImpl
   public JsonType getType() {
     return JsonType.NUMBER;
   }
-
 }
-
