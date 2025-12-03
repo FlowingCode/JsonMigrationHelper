@@ -30,6 +30,7 @@ import elemental.json.JsonValue;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import lombok.SneakyThrows;
+import lombok.experimental.UtilityClass;
 
 /**
  * Provides a compatibility layer for JSON handling to abstract away breaking changes
@@ -41,6 +42,7 @@ import lombok.SneakyThrows;
  * 
  * @author Javier Godoy
  */
+@UtilityClass
 public class JsonMigration {
 
   private static final JsonMigrationHelper helper = initializeHelper();
