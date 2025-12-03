@@ -152,6 +152,15 @@ public class ViewInitializerImpl extends InstrumentationViewInitializer {
 }
 ```
 
+This feature requires a dependency with ASM (which is not provided out-of-the-box in Vaadin 14-23):
+```
+<dependency>
+    <groupId>org.ow2.asm</groupId>
+    <artifactId>asm</artifactId>
+    <version>9.8</version>
+</dependency>
+```
+
 ## Direct Usage
 
 The helper methods can also be used directly from the `JsonMigration` class:
