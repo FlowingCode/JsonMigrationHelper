@@ -65,6 +65,20 @@ final class ClassInstrumentationUtil {
 
   private final Map<ClassLoader, InstrumentedClassLoader> classLoaderCache = new WeakHashMap<>();
 
+  private static final boolean IS_ASM_PRESENT;
+
+  static {
+    boolean isPresent;
+    try {
+      Class.forName("org.objectweb.asm.ClassWriter", false,
+          ClassInstrumentationUtil.class.getClassLoader());
+      isPresent = true;
+    } catch (ClassNotFoundException e) {
+      isPresent = false;
+    }
+    IS_ASM_PRESENT = isPresent;
+  }
+
   ClassInstrumentationUtil(int version) {
     this.version = version;
   }
@@ -121,6 +135,10 @@ final class ClassInstrumentationUtil {
     if (!needsInstrumentation(parent)) {
       logger.info("{} no instrumentation needed", parent);
       return parent;
+    }
+
+    if (!IS_ASM_PRESENT) {
+      throw new IllegalStateException("Missing optional dependency org.ow2.asm:asm:9.8");
     }
 
     // Check for accessible no-arg constructor
