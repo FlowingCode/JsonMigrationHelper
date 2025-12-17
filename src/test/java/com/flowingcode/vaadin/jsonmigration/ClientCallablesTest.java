@@ -77,6 +77,8 @@ public abstract class ClientCallablesTest {
 
   protected abstract Object createJsonObject();
 
+  protected abstract Object createArrayOfJsonObject();
+
   @Test
   public void test__V() throws Exception {
     ClientCallable__V instrumented =
@@ -282,4 +284,26 @@ public abstract class ClientCallablesTest {
     invokeTestMethod(instrumented, createJsonObject());
     assertTrue(instrumented.hasBeenTraced());
   }
+
+  @Test
+  public void test_ArrayOfJsonObject__V() throws Exception {
+    ClientCallable_ArrayOfJsonObject__V instrumented =
+        instrumentClass(ClientCallable_ArrayOfJsonObject__V.class)
+            .getDeclaredConstructor()
+            .newInstance();
+    invokeTestMethod(instrumented, createArrayOfJsonObject());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+
+  @Test
+  public void test_JsonObjectArgs__V() throws Exception {
+    ClientCallable_JsonObjectVarargs__V instrumented =
+        instrumentClass(ClientCallable_JsonObjectVarargs__V.class)
+            .getDeclaredConstructor()
+            .newInstance();
+    invokeTestMethod(instrumented, createArrayOfJsonObject());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
 }

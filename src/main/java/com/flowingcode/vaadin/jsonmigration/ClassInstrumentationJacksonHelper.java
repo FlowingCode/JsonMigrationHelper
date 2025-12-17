@@ -48,6 +48,8 @@ class ClassInstrumentationJacksonHelper {
       return Type.getDescriptor(StringNode.class);
     } else if (JsonValue.class.isAssignableFrom(type)) {
       return Type.getDescriptor(JsonNode.class);
+    } else if (JsonValue[].class.isAssignableFrom(type)) {
+      return "[" + getConvertedTypeDescriptor(type.getComponentType());
     }
     return Type.getDescriptor(type);
   }

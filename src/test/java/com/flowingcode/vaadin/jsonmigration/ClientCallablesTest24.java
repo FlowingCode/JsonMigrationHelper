@@ -24,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.vaadin.flow.component.Component;
 import elemental.json.Json;
+import elemental.json.JsonObject;
 import elemental.json.JsonValue;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
@@ -37,7 +38,7 @@ public class ClientCallablesTest24 extends ClientCallablesTest {
   @Override
   protected <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
     for (Class<?> arg : getClientCallableTestMethod(clazz).getParameterTypes()) {
-      if (JsonValue.class.isAssignableFrom(arg)) {
+      if (JsonValue.class.isAssignableFrom(arg) || JsonValue[].class.isAssignableFrom(arg)) {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(containsString(ERRMSG));
         break;
@@ -74,7 +75,13 @@ public class ClientCallablesTest24 extends ClientCallablesTest {
   }
 
   @Override
-  protected Object createJsonObject() {
+  protected JsonObject createJsonObject() {
     return Json.createObject();
   }
+
+  @Override
+  protected Object createArrayOfJsonObject() {
+    return new JsonObject[] {createJsonObject(), createJsonObject()};
+  }
+
 }

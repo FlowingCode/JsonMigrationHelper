@@ -62,7 +62,13 @@ public class LegacyClientCallablesTest25 extends LegacyClientCallablesTest {
   }
 
   @Override
-  protected Object createJsonObject() {
+  protected ObjectNode createJsonObject() {
     return new ObjectNode(JsonNodeFactory.instance);
   }
+
+  @Override
+  protected Object createArrayOfJsonObject() {
+    return new ObjectNode[] {createJsonObject(), createJsonObject()};
+  }
+
 }

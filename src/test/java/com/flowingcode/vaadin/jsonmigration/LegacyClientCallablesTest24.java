@@ -21,6 +21,7 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.Component;
 import elemental.json.Json;
+import elemental.json.JsonObject;
 
 public class LegacyClientCallablesTest24 extends LegacyClientCallablesTest {
 
@@ -55,7 +56,13 @@ public class LegacyClientCallablesTest24 extends LegacyClientCallablesTest {
   }
 
   @Override
-  protected Object createJsonObject() {
+  protected JsonObject createJsonObject() {
     return Json.createObject();
   }
+
+  @Override
+  protected Object createArrayOfJsonObject() {
+    return new JsonObject[] {createJsonObject(), createJsonObject()};
+  }
+
 }
