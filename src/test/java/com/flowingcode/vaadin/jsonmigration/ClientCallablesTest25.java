@@ -42,7 +42,7 @@ public class ClientCallablesTest25 extends ClientCallablesTest {
   @Override
   protected <T extends Component> Class<? extends T> instrumentClass(Class<T> clazz) {
     for (Class<?> arg : getClientCallableTestMethod(clazz).getParameterTypes()) {
-      if (JsonValue.class.isAssignableFrom(arg)) {
+      if (JsonValue.class.isAssignableFrom(arg) || JsonValue[].class.isAssignableFrom(arg)) {
         thrown.expect(IllegalArgumentException.class);
         thrown.expectMessage(containsString(ERRMSG));
         break;
@@ -77,7 +77,13 @@ public class ClientCallablesTest25 extends ClientCallablesTest {
   }
 
   @Override
-  protected Object createJsonObject() {
+  protected ObjectNode createJsonObject() {
     return new ObjectNode(JsonNodeFactory.instance);
   }
+
+  @Override
+  protected Object createArrayOfJsonObject() {
+    return new ObjectNode[] {createJsonObject(), createJsonObject()};
+  }
+
 }

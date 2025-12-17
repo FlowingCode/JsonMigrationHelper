@@ -237,7 +237,8 @@ final class ClassInstrumentationUtil {
 
   private static boolean hasJsonValueParameters(Method method) {
     for (Class<?> paramType : method.getParameterTypes()) {
-      if (JsonValue.class.isAssignableFrom(paramType)) {
+      if (JsonValue.class.isAssignableFrom(paramType)
+          || JsonValue[].class.isAssignableFrom(paramType)) {
         return true;
       }
     }
@@ -582,7 +583,7 @@ final class ClassInstrumentationUtil {
     private String getMethodDescriptor(Method method, boolean convertJsonValueParams) {
       StringBuilder sb = new StringBuilder("(");
       for (Class<?> paramType : method.getParameterTypes()) {
-        if (convertJsonValueParams && JsonValue.class.isAssignableFrom(paramType)) {
+        if (convertJsonValueParams) {
           sb.append(getConvertedTypeDescriptor(paramType));
         } else {
           sb.append(Type.getDescriptor(paramType));
