@@ -16,7 +16,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <drivers.dir>${project.basedir}/drivers</drivers.dir>
-        <flowingcode.commons.demo.version>4.2.0</flowingcode.commons.demo.version>
     </properties>
 
     <organization>
@@ -89,12 +88,6 @@
             <artifactId>gwt-elemental</artifactId>
             <version>2.8.2.vaadin2</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.flowingcode.vaadin.addons.demo</groupId>
-            <artifactId>commons-demo</artifactId>
-            <version>${flowingcode.commons.demo.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
