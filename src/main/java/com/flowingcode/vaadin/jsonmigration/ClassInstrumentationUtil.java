@@ -467,6 +467,26 @@ final class ClassInstrumentationUtil {
           }
 
           localVarIndex++;
+        } else if (hasJsonValueParams && JsonValue[].class.isAssignableFrom(paramType)) {
+          // Load the JsonNode[] parameter and create target array
+          mv.visitVarInsn(Opcodes.ALOAD, localVarIndex);
+          mv.visitInsn(Opcodes.DUP);
+          mv.visitInsn(Opcodes.ARRAYLENGTH);
+          mv.visitTypeInsn(Opcodes.ANEWARRAY, Type.getInternalName(paramType.getComponentType()));
+
+          // Stack before: [SourceArray, TargetArray]
+          // Stack after: [TargetArray, SourceArray, TargetArray]
+          mv.visitInsn(Opcodes.DUP_X1);
+
+          // Call JsonMigration.convertToJsonValue(JsonNode[], JsonValue[])
+          mv.visitMethodInsn(
+              Opcodes.INVOKESTATIC,
+              "com/flowingcode/vaadin/jsonmigration/JsonMigration",
+              "convertToJsonValue",
+              "([Ljava/lang/Object;[Lelemental/json/JsonValue;)V",
+              false);
+
+          localVarIndex++;
         } else {
           localVarIndex += loadParameter(mv, paramType, localVarIndex);
         }

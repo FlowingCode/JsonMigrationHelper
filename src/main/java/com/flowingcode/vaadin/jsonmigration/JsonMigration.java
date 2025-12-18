@@ -91,6 +91,32 @@ public class JsonMigration {
     return helper.convertToJsonValue(object);
   }
 
+  /**
+   * Converts an array of objects into an array of {@code JsonValue} objects.
+   *
+   * <p>
+   * This method delegates the conversion to a version-specific helper to handle any differences in
+   * the serialization process.
+   *
+   * @param source the array of objects to convert
+   * @param target the destination array to be populated with converted {@code JsonValue}s
+   * @throws NullPointerException if source or target is null
+   * @throws IllegalArgumentException if the array lengths do not match
+   * @throws ArrayStoreException if an element in the {@code source} array is converted into a type
+   *         that is not assignable to the runtime component type of the {@code target} array
+   */
+  public static void convertToJsonValue(Object[] source, JsonValue[] target) {
+    if (source.length != target.length) {
+      throw new IllegalArgumentException(
+          String.format("Array length mismatch: source.length=%d, target.length=%d",
+              source.length, target.length));
+    }
+
+    for (int i = 0; i < target.length; i++) {
+      target[i] = convertToJsonValue(source[i]);
+    }
+  }
+
   @SneakyThrows
   private static Object invoke(Method method, Object instance, Object... args) {
     return helper.invoke(method, instance, args);
