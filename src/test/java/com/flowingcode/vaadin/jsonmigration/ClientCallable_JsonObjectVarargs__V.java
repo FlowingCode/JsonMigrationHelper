@@ -30,7 +30,7 @@ import org.hamcrest.Matchers;
 public class ClientCallable_JsonObjectVarargs__V extends BaseClientCallable {
 
   @ClientCallable
-  public void test(JsonObject[] arg) {
+  public void test(JsonObject... arg) {
     assertThat(arg, notNullValue());
     assertThat(arg, not(emptyArray()));
     assertThat(arg, Matchers.instanceOf(JsonObject[].class));
