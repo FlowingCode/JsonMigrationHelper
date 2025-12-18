@@ -79,6 +79,8 @@ public abstract class LegacyClientCallablesTest {
 
   protected abstract Object createArrayOfJsonObject();
 
+  protected abstract Object createArrayOfJsonString();
+
   @Test
   public void test__V() throws Exception {
     LegacyClientCallable__V instrumented =
@@ -312,6 +314,15 @@ public abstract class LegacyClientCallablesTest {
             .getDeclaredConstructor()
             .newInstance();
     invokeTestMethod(instrumented, createJsonObject());
+    assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  public void test_ArrayOfJsonString__V() throws Exception {
+    LegacyClientCallable_ArrayOfJsonString__V instrumented =
+        instrumentClass(LegacyClientCallable_ArrayOfJsonString__V.class).getDeclaredConstructor()
+            .newInstance();
+    invokeTestMethod(instrumented, createArrayOfJsonString());
     assertTrue(instrumented.hasBeenTraced());
   }
 
