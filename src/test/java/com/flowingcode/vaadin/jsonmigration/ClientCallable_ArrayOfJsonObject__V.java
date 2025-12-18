@@ -19,18 +19,19 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import com.vaadin.flow.component.ClientCallable;
 import elemental.json.JsonObject;
-import org.junit.Assert;
 
 public class ClientCallable_ArrayOfJsonObject__V extends BaseClientCallable {
 
   @ClientCallable
   public void test(JsonObject[] arg) {
-    Assert.assertNotNull(arg);
-    Assert.assertThat(arg, not(emptyArray()));
+    assertThat(arg, notNullValue());
+    assertThat(arg, not(emptyArray()));
     trace();
   }
 }
