@@ -52,7 +52,7 @@ public class LegacyClientCallablesTest25 extends LegacyClientCallablesTest {
   }
 
   @Override
-  protected Object createJsonString() {
+  protected StringNode createJsonString() {
     return StringNode.valueOf("test");
   }
 
@@ -69,6 +69,11 @@ public class LegacyClientCallablesTest25 extends LegacyClientCallablesTest {
   @Override
   protected Object createArrayOfJsonObject() {
     return new ObjectNode[] {createJsonObject(), createJsonObject()};
+  }
+
+  @Override
+  protected Object createArrayOfJsonString() {
+    return new StringNode[] {createJsonString(), createJsonString()};
   }
 
 }
