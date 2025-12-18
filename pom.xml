@@ -4,7 +4,7 @@
 
     <groupId>com.flowingcode.vaadin</groupId>
     <artifactId>json-migration-helper</artifactId>
-    <version>0.9.1-SNAPSHOT</version>
+    <version>0.9.1</version>
     <name>Json Migration Helper</name>
     <description>Json Migration Helper for Vaadin Flow</description>
     <url>https://www.flowingcode.com/en/open-source/</url>
@@ -36,7 +36,7 @@
         <url>https://github.com/FlowingCode/JsonMigrationHelper</url>
         <connection>scm:git:git://github.com/FlowingCode/JsonMigrationHelper.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/FlowingCode/JsonMigrationHelper.git</developerConnection>
-        <tag>master</tag>
+        <tag>0.9.1</tag>
     </scm>
     
     <developers>
