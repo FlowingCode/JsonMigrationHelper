@@ -24,6 +24,7 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import elemental.json.JsonObject;
+import org.hamcrest.Matchers;
 
 public class LegacyClientCallable_JsonObjectVarargs__V extends BaseClientCallable {
 
@@ -31,6 +32,7 @@ public class LegacyClientCallable_JsonObjectVarargs__V extends BaseClientCallabl
   public void test(JsonObject[] arg) {
     assertThat(arg, notNullValue());
     assertThat(arg, not(emptyArray()));
+    assertThat(arg, Matchers.instanceOf(JsonObject[].class));
     trace();
   }
 }

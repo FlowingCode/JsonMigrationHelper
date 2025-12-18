@@ -25,6 +25,7 @@ import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import com.vaadin.flow.component.ClientCallable;
 import elemental.json.JsonObject;
+import org.hamcrest.Matchers;
 
 public class ClientCallable_ArrayOfJsonObject__V extends BaseClientCallable {
 
@@ -32,6 +33,7 @@ public class ClientCallable_ArrayOfJsonObject__V extends BaseClientCallable {
   public void test(JsonObject[] arg) {
     assertThat(arg, notNullValue());
     assertThat(arg, not(emptyArray()));
+    assertThat(arg, Matchers.instanceOf(JsonObject[].class));
     trace();
   }
 }
