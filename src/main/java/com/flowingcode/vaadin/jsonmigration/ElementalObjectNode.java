@@ -2,7 +2,7 @@
  * #%L
  * Json Migration Helper
  * %%
- * Copyright (C) 2025 Flowing Code
+ * Copyright (C) 2025 - 2026 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import tools.jackson.databind.node.JsonNodeFactory;
 import tools.jackson.databind.node.ObjectNode;
 
 @SuppressWarnings("serial")
-class ElementalObjectNode extends ObjectNode implements UnsupportedJsonValueImpl {
+class ElementalObjectNode extends ObjectNode implements UnsupportedJsonValueImpl<JsonObject> {
 
   public ElementalObjectNode(JsonObject o) {
     super(JsonNodeFactory.instance, children(o));

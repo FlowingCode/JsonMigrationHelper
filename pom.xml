@@ -137,6 +137,30 @@
 
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.flowingcode.vaadin.jsonmigration.ElementalNodeAsmPostProcessor</mainClass>
+                            <arguments>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalArrayNode.class</argument>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalBooleanNode.class</argument>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalNullNode.class</argument>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalNumberNode.class</argument>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalObjectNode.class</argument>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalStringNode.class</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.2</version>
@@ -216,6 +240,9 @@
                             <quiet>true</quiet>
                             <doclint>none</doclint>
 							<failOnWarnings>true</failOnWarnings>
+                            <sourceFileExcludes>
+                                <sourceFileExclude>**/ElementalNodeAsmPostProcessor.java</sourceFileExclude>
+                            </sourceFileExcludes>
                             <links>
                                 <link>https://javadoc.io/doc/com.vaadin/vaadin-platform-javadoc/${vaadin.version}</link>								
                             </links>
@@ -229,6 +256,8 @@
                             <!-- Generated file that shouldn't be included in add-ons -->
                             <excludes>
                                 <exclude>META-INF/VAADIN/config/flow-build-info.json</exclude>
+                                <exclude>com/flowingcode/vaadin/jsonmigration/ElementalNodeAsmPostProcessor.class</exclude>
+                                <exclude>com/flowingcode/vaadin/jsonmigration/ElementalNodeAsmPostProcessor$*.class</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

@@ -2,7 +2,7 @@
  * #%L
  * Json Migration Helper
  * %%
- * Copyright (C) 2025 Flowing Code
+ * Copyright (C) 2025 - 2026 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,12 @@
  */
 package com.flowingcode.vaadin.jsonmigration;
 
+import elemental.json.JsonNull;
 import elemental.json.JsonType;
 import tools.jackson.databind.node.NullNode;
 
 @SuppressWarnings("serial")
-class ElementalNullNode extends NullNode implements UnsupportedJsonValueImpl {
+class ElementalNullNode extends NullNode implements UnsupportedJsonValueImpl<JsonNull> {
 
   public ElementalNullNode() {
     super();
