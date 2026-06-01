@@ -429,7 +429,13 @@ final class ClassInstrumentationUtil {
               null,
               getExceptionInternalNames(method.getExceptionTypes()));
 
-      mv.visitAnnotation(Type.getDescriptor(ClientCallable.class), true);
+      mv.visitAnnotation(Type.getDescriptor(ClientCallable.class), true).visitEnd();
+      for (java.lang.annotation.Annotation annotation : method.getAnnotations()) {
+        if ("com.vaadin.flow.component.internal.AllowInert"
+            .equals(annotation.annotationType().getName())) {
+          mv.visitAnnotation(Type.getDescriptor(annotation.annotationType()), true).visitEnd();
+        }
+      }
       mv.visitCode();
 
       boolean isPrivate = Modifier.isPrivate(method.getModifiers());
