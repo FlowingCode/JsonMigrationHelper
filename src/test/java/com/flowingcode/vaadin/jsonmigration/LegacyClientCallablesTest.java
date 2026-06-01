@@ -20,11 +20,13 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
 import elemental.json.JsonValue;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import org.junit.Test;
 
@@ -344,6 +346,23 @@ public abstract class LegacyClientCallablesTest {
             .newInstance();
     invokeTestMethod(instrumented, createArrayOfJsonObject());
     assertTrue(instrumented.hasBeenTraced());
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  public void testAllowInert__V() throws Exception {
+    LegacyClientCallable_AllowInert__V instrumented =
+        instrumentClass(LegacyClientCallable_AllowInert__V.class)
+            .getDeclaredConstructor()
+            .newInstance();
+    Method testMethod = getClientCallableTestMethod(instrumented);
+    assertNotNull("instrumented method is not annotated with @ClientCallable", testMethod);
+    Class<? extends Annotation> allowInert =
+        (Class<? extends Annotation>)
+            Class.forName("com.vaadin.flow.component.internal.AllowInert");
+    assertTrue(
+        "instrumented method is not annotated with @AllowInert",
+        testMethod.isAnnotationPresent(allowInert));
   }
 
 }
