@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.flowingcode.vaadin</groupId>
+        <artifactId>json-migration-helper-tests</artifactId>
+        <version>0.9.4-SNAPSHOT</version>
+        <relativePath>../tests-shared</relativePath>
+    </parent>
+
+    <artifactId>json-migration-helper-tests-v14</artifactId>
+    <packaging>jar</packaging>
+    <name>Json Migration Helper :: Tests :: Vaadin 14</name>
+    <description>Runs the shared test suite against the Vaadin 14 runtime.</description>
+
+    <properties>
+        <vaadin.version>14.11.13</vaadin.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- LitRenderer does not exist in Vaadin 14, so the renderer test (which references it
+                 directly) cannot be compiled here. It still compiles and runs on 23/24/25. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <testExcludes>
+                        <testExclude>**/LitRendererMigrationExtensionTest.java</testExclude>
+                    </testExcludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

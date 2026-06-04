@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.flowingcode.vaadin</groupId>
+        <artifactId>json-migration-helper-tests</artifactId>
+        <version>0.9.4-SNAPSHOT</version>
+        <relativePath>../tests-shared</relativePath>
+    </parent>
+
+    <artifactId>json-migration-helper-tests-v24</artifactId>
+    <packaging>jar</packaging>
+    <name>Json Migration Helper :: Tests :: Vaadin 24</name>
+    <description>Runs the shared test suite against the Vaadin 24 runtime.</description>
+
+    <properties>
+        <vaadin.version>24.10.6</vaadin.version>
+    </properties>
+
+</project>
