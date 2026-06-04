@@ -72,6 +72,12 @@
               <optional>true</optional>
         </dependency>
         <dependency>
+              <groupId>org.ow2.asm</groupId>
+              <artifactId>asm-commons</artifactId>
+              <version>9.8</version>
+              <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>3.0.0</version>
@@ -142,6 +148,7 @@
                 <version>3.1.0</version>
                 <executions>
                     <execution>
+                        <id>patch-elemental-nodes</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>java</goal>
@@ -155,6 +162,19 @@
                                 <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalNumberNode.class</argument>
                                 <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalObjectNode.class</argument>
                                 <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/ElementalStringNode.class</argument>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>patch-lit-renderer</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>com.flowingcode.vaadin.jsonmigration.LitRendererAsmPostProcessor</mainClass>
+                            <arguments>
+                                <argument>${project.build.outputDirectory}/com/flowingcode/vaadin/jsonmigration/LitRendererMigrationExtension.class</argument>
                             </arguments>
                         </configuration>
                     </execution>
@@ -242,6 +262,7 @@
 							<failOnWarnings>true</failOnWarnings>
                             <sourceFileExcludes>
                                 <sourceFileExclude>**/ElementalNodeAsmPostProcessor.java</sourceFileExclude>
+                                <sourceFileExclude>**/LitRendererAsmPostProcessor.java</sourceFileExclude>
                             </sourceFileExcludes>
                             <links>
                                 <link>https://javadoc.io/doc/com.vaadin/vaadin-platform-javadoc/${vaadin.version}</link>								
@@ -258,6 +279,8 @@
                                 <exclude>META-INF/VAADIN/config/flow-build-info.json</exclude>
                                 <exclude>com/flowingcode/vaadin/jsonmigration/ElementalNodeAsmPostProcessor.class</exclude>
                                 <exclude>com/flowingcode/vaadin/jsonmigration/ElementalNodeAsmPostProcessor$*.class</exclude>
+                                <exclude>com/flowingcode/vaadin/jsonmigration/LitRendererAsmPostProcessor.class</exclude>
+                                <exclude>com/flowingcode/vaadin/jsonmigration/LitRendererAsmPostProcessor$*.class</exclude>
                             </excludes>
                         </configuration>
                     </plugin>
