@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.flowingcode.vaadin</groupId>
+        <artifactId>json-migration-helper-tests</artifactId>
+        <version>0.9.4-SNAPSHOT</version>
+        <relativePath>../tests-shared</relativePath>
+    </parent>
+
+    <artifactId>json-migration-helper-tests-v25</artifactId>
+    <packaging>jar</packaging>
+    <name>Json Migration Helper :: Tests :: Vaadin 25</name>
+    <description>Runs the shared test suite against the Vaadin 25 runtime.</description>
+
+    <properties>
+        <vaadin.version>25.1.5</vaadin.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- Override the inherited selection: run the Jackson (*Test25) suites plus the
+                 always-on common suites, instead of the legacy *Test24 suites. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes combine.self="override">
+                        <include>**/*Test25.java</include>
+                        <include>**/JsonMigrationHelper25Test.java</include>
+                        <include>**/LitRendererMigrationExtensionTest.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

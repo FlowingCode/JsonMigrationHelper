@@ -21,13 +21,13 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assume.assumeTrue;
 
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.function.SerializableBiConsumer;
 import com.vaadin.flow.server.Version;
 import elemental.json.JsonArray;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Map;
 import org.junit.Test;
 
@@ -35,21 +35,28 @@ public class LitRendererMigrationExtensionTest {
 
   @Test
   public void testWithFunctionRegistersHandler() throws Exception {
-    assumeTrue("LitRenderer requires Vaadin 24+", Version.getMajorVersion() >= 24);
-    Class<?> litRendererClass = Class.forName("com.vaadin.flow.data.renderer.LitRenderer");
-    Method of = litRendererClass.getMethod("of", String.class);
-    Object renderer = of.invoke(null, "<div></div>");
+    // Vaadin 23's LitRenderer.of() reads UI.getCurrent(); 24+ does not. Create a UI only on 23 so
+    // that 24/25 never load the UI class (and so don't need the servlet API on the test classpath).
+    boolean needsUi = Version.getMajorVersion() < 24;
+    if (needsUi) {
+      UI.setCurrent(new UI());
+    }
+    try {
+      LitRenderer<String> renderer = LitRenderer.of("<div></div>");
 
-    SerializableBiConsumer<String, JsonArray> handler = (source, array) -> {};
+      SerializableBiConsumer<String, JsonArray> handler = (source, array) -> {};
 
-    Method withFunction = LitRendererMigrationExtension.class.getDeclaredMethod(
-        "withFunction", litRendererClass, String.class, SerializableBiConsumer.class);
-    withFunction.setAccessible(true);
-    Object result = withFunction.invoke(null, renderer, "click", handler);
+      LitRenderer<String> result =
+          LitRendererMigrationExtension.withFunction(renderer, "click", handler);
 
-    assertSame(renderer, result);
-    assertNotNull("Handler for 'click' should be registered on the renderer",
-        findRegisteredHandler(renderer, "click"));
+      assertSame(renderer, result);
+      assertNotNull("Handler for 'click' should be registered on the renderer",
+          findRegisteredHandler(renderer, "click"));
+    } finally {
+      if (needsUi) {
+        UI.setCurrent(null);
+      }
+    }
   }
 
   private static Object findRegisteredHandler(Object renderer, String functionName)
