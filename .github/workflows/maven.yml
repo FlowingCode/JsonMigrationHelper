@@ -21,29 +21,44 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Each Vaadin runtime is exercised on the JDK that matches its baseline.
-        # Vaadin 14/23/24 run on Java 17; Vaadin 25 is compiled to Java 21 bytecode
-        # and only loads on Java 21, so it must be built and tested there.
-        # (maven.compiler.source/target=1.8 sets bytecode level only, not the runtime JDK.)
+        # Each job tests the module whose Vaadin baseline matches that JDK exactly:
+        #   tests-v14 -> Java 8, tests-v23 -> Java 11, tests-v24 -> Java 17, tests-v25 -> Java 21
+        # Compilation always needs Java 17+ (the shared *Test25 sources reference Jackson 3,
+        # which is Java 17 bytecode), so the 8/11 jobs compile on JDK 17 and fork the
+        # surefire test JVM onto the target runtime via -Djvm.
         include:
-          - vaadin: '14'
-            java: '17'
-          - vaadin: '23'
-            java: '17'
-          - vaadin: '24'
-            java: '17'
-          - vaadin: '25'
-            java: '21'
-    name: Vaadin ${{ matrix.vaadin }} (JDK ${{ matrix.java }})
+          - run-java: '8'
+            build-java: '17'
+            module: tests-v14
+            test-jvm: -Djvm=$JAVA_HOME_8_X64/bin/java
+          - run-java: '11'
+            build-java: '17'
+            module: tests-v23
+            test-jvm: -Djvm=$JAVA_HOME_11_X64/bin/java
+          - run-java: '17'
+            build-java: '17'
+            module: tests-v24
+            test-jvm: ''
+          - run-java: '21'
+            build-java: '21'
+            module: tests-v25
+            test-jvm: ''
+    name: JDK ${{ matrix.run-java }}
     steps:
     - uses: actions/checkout@v3
-    - name: Set up JDK ${{ matrix.java }}
+    - name: Set up runtime JDK ${{ matrix.run-java }}
+      if: matrix.run-java != matrix.build-java
       uses: actions/setup-java@v3
       with:
-        java-version: ${{ matrix.java }}
+        java-version: ${{ matrix.run-java }}
+        distribution: 'temurin'
+    # Installed last so it becomes the default JAVA_HOME used by Maven; the runtime
+    # JDK above remains available as JAVA_HOME_<version>_X64 for the -Djvm fork.
+    - name: Set up build JDK ${{ matrix.build-java }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.build-java }}
         distribution: 'temurin'
         cache: maven
-    # Build only this version's test module plus its upstream (core, tests-shared)
-    # via -am, so the module compiles and its suite runs on the matching JDK.
-    - name: Build (Vaadin ${{ matrix.vaadin }})
-      run: mvn -B package -pl tests-v${{ matrix.vaadin }} -am
+    - name: Build and test (JDK ${{ matrix.run-java }} runtime)
+      run: mvn -B package -pl ${{ matrix.module }} -am ${{ matrix.test-jvm }}
