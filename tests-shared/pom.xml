@@ -99,10 +99,10 @@
             <!--
               Default test selection (inherited by tests-v14/v23/v24): the legacy/elemental
               (*Test24) suites plus the always-on common suites. The tests-v25 module overrides
-              this to run the Jackson (*Test25) suites instead.
-
-              JsonMigrationHelper25Test ends in "25Test" (not "Test25"), so it is not matched by
-              the *Test25 glob and is listed explicitly as a common suite.
+              this to run the Jackson (*Test25) suites instead, plus JsonMigrationHelper25Test:
+              that suite exercises the Jackson-backed helper, which is only the active
+              implementation on Vaadin 25 (and Jackson 3 requires Java 17+ anyway, while the
+              v14/v23 modules must be runnable on their Java 8/11 baselines).
             -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -110,7 +110,6 @@
                 <configuration>
                     <includes>
                         <include>**/*Test24.java</include>
-                        <include>**/JsonMigrationHelper25Test.java</include>
                         <include>**/LitRendererMigrationExtensionTest.java</include>
                     </includes>
                 </configuration>
