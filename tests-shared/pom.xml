@@ -5,7 +5,7 @@
     <parent>
         <groupId>com.flowingcode.vaadin</groupId>
         <artifactId>json-migration-helper-parent</artifactId>
-        <version>0.9.4-SNAPSHOT</version>
+        <version>0.9.4</version>
     </parent>
 
     <artifactId>json-migration-helper-tests</artifactId>
