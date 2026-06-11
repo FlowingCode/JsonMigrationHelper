@@ -16,6 +16,13 @@
       against different Vaadin runtimes.
     -->
 
+    <scm>
+        <url>https://github.com/FlowingCode/JsonMigrationHelper</url>
+        <connection>scm:git:git://github.com/FlowingCode/JsonMigrationHelper.git</connection>
+        <developerConnection>scm:git:ssh://git@github.com:/FlowingCode/JsonMigrationHelper.git</developerConnection>
+        <tag>master</tag>
+    </scm>
+
     <modules>
         <module>core</module>
         <module>tests-shared</module>
