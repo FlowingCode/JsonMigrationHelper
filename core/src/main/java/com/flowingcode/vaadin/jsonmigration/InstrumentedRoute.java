@@ -2,7 +2,7 @@
  * #%L
  * Json Migration Helper
  * %%
- * Copyright (C) 2025 Flowing Code
+ * Copyright (C) 2025-2026 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,9 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLayout;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -42,4 +45,13 @@ public @interface InstrumentedRoute {
    * @return the route path
    */
   String value();
+  
+  /**
+   * Sets the parent component for the route target component.
+   * <p>
+   *
+   * @return the layout component class used by the route target component.
+   * @see Route#layout()
+   */
+  Class<? extends RouterLayout> layout() default UI.class;
 }
