@@ -2,7 +2,7 @@
  * #%L
  * Json Migration Helper
  * %%
- * Copyright (C) 2025 Flowing Code
+ * Copyright (C) 2025-2026 Flowing Code
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +20,14 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.router.ParentLayout;
 import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouterLayout;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Abstract base class for Vaadin service initializers that register instrumented views. Subclasses
@@ -39,6 +45,10 @@ public abstract class InstrumentationViewInitializer implements VaadinServiceIni
    * JsonMigration#instrumentClass(Class)} to get the instrumented class and registers it as a
    * Vaadin view with the route derived from the annotation.
    *
+   * The parent layout chain is derived from {@link InstrumentedRoute#layout()} and the {@link
+   * ParentLayout} annotations of the layout classes, and each layout in the chain is instrumented, or if a layout in the parent chain is not a {@link Component}
+   * as well.
+   *
    * @param navigationTarget the component class to instrument and register, must be annotated with
    *     {@link InstrumentedRoute}
    * @throws IllegalArgumentException if the navigationTarget is not annotated with {@link
@@ -55,6 +65,32 @@ public abstract class InstrumentationViewInitializer implements VaadinServiceIni
 
     String route = annotation.value();
     navigationTarget = JsonMigration.instrumentClass(navigationTarget);
-    RouteConfiguration.forApplicationScope().setRoute(route, navigationTarget);
+
+    List<Class<? extends RouterLayout>> parentChain = getParentChain(annotation.layout());
+    RouteConfiguration.forApplicationScope().setRoute(route, navigationTarget, parentChain);
+  }
+
+  static List<Class<? extends RouterLayout>> getParentChain(
+      Class<? extends RouterLayout> layout) {
+    List<Class<? extends RouterLayout>> parentChain = Collections.emptyList();
+    while (layout != UI.class) {
+      if (parentChain.isEmpty()) {
+        parentChain = new ArrayList<>();
+      }
+      parentChain.add(instrumentLayout(layout));
+      ParentLayout parentLayout = layout.getAnnotation(ParentLayout.class);
+      layout = parentLayout != null ? parentLayout.value() : UI.class;
+    }
+    return parentChain;
+  }
+
+  private static Class<? extends RouterLayout> instrumentLayout(
+      Class<? extends RouterLayout> layout) {
+    if (!Component.class.isAssignableFrom(layout)) {
+      throw new IllegalArgumentException(
+          layout.getName() + " must extend " + Component.class.getName());
+    }
+    return JsonMigration.instrumentClass(layout.asSubclass(Component.class))
+        .asSubclass(RouterLayout.class);
   }
 }

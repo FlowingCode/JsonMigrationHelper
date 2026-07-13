@@ -30,6 +30,7 @@
                         <include>**/*Test25.java</include>
                         <include>**/JsonMigrationHelper25Test.java</include>
                         <include>**/LitRendererMigrationExtensionTest.java</include>
+                        <include>**/InstrumentationViewInitializerTest.java</include>
                     </includes>
                 </configuration>
             </plugin>
