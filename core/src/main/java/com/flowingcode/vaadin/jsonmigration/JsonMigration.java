@@ -59,6 +59,9 @@ public class JsonMigration {
   private static final Class<?> BASE_JSON_NODE = lookup_BaseJsonNode();
 
   private static Class<?> lookup_BaseJsonNode() {
+    if (Version.getMajorVersion() <= 24) {
+      return null;
+    }
     try {
       return Class.forName("tools.jackson.databind.node.BaseJsonNode");
     } catch (ClassNotFoundException e) {
@@ -127,6 +130,12 @@ public class JsonMigration {
   @SneakyThrows
   private static Method lookup_setPropertyJson() {
     if (Version.getMajorVersion() > 24) {
+      if (BASE_JSON_NODE == null) {
+        throw new IllegalStateException(
+            "tools.jackson.databind.node.BaseJsonNode is not available on this runtime, "
+                + "but is required to resolve Element#setPropertyJson on Vaadin "
+                + Version.getFullVersion());
+      }
       return Element.class.getMethod("setPropertyJson", String.class, BASE_JSON_NODE);
     } else {
       return Element.class.getMethod("setPropertyJson", String.class, JsonValue.class);
