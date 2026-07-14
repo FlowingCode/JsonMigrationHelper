@@ -20,12 +20,16 @@
 package com.flowingcode.vaadin.jsonmigration;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.dom.Element;
 import com.vaadin.flow.router.ParentLayout;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLayout;
 import elemental.json.JsonValue;
 import java.util.Arrays;
@@ -65,6 +69,10 @@ public class InstrumentationViewInitializerTest {
 
   @InstrumentedRoute(value = "with-layout", layout = LeafLayout.class)
   public static class RouteWithLayout extends Div {}
+
+  @Route("already-annotated")
+  @InstrumentedRoute("already-annotated-instrumented")
+  public static class RouteAlreadyAnnotated extends Div {}
 
   @Test
   public void testLayoutDefaultsToUI() {
@@ -112,5 +120,32 @@ public class InstrumentationViewInitializerTest {
   @Test(expected = IllegalArgumentException.class)
   public void testNonComponentLayoutThrows() {
     InstrumentationViewInitializer.getParentChain(NonComponentLayout.class);
+  }
+
+  @Test
+  public void testRouteAnnotationIsAdded() {
+    Class<?> instrumented = JsonMigration.instrumentClass(RouteWithoutLayout.class);
+    assertNotEquals(RouteWithoutLayout.class, instrumented);
+    Route route = instrumented.getAnnotation(Route.class);
+    assertNotNull(route);
+    assertEquals("without-layout", route.value());
+    assertEquals(UI.class, route.layout());
+    assertFalse(route.registerAtStartup());
+  }
+
+  @Test
+  public void testRouteAnnotationPropagatesLayout() {
+    Class<?> instrumented = JsonMigration.instrumentClass(RouteWithLayout.class);
+    Route route = instrumented.getAnnotation(Route.class);
+    assertNotNull(route);
+    assertEquals("with-layout", route.value());
+    assertEquals(LeafLayout.class, route.layout());
+    assertFalse(route.registerAtStartup());
+  }
+
+  @Test
+  public void testExistingRouteAnnotationIsNotReplaced() {
+    assertEquals(
+        RouteAlreadyAnnotated.class, JsonMigration.instrumentClass(RouteAlreadyAnnotated.class));
   }
 }
