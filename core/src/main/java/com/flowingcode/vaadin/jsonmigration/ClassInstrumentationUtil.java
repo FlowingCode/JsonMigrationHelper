@@ -21,6 +21,7 @@ package com.flowingcode.vaadin.jsonmigration;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.router.Route;
 import elemental.json.JsonValue;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -38,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.SneakyThrows;
+import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -163,7 +165,12 @@ final class ClassInstrumentationUtil {
   }
 
   private boolean needsInstrumentation(Class<?> parent) {
-    return !getInstrumentableMethods(parent).isEmpty();
+    return needsRouteAnnotation(parent) || !getInstrumentableMethods(parent).isEmpty();
+  }
+
+  private static boolean needsRouteAnnotation(Class<?> parent) {
+    return parent.isAnnotationPresent(InstrumentedRoute.class)
+        && !parent.isAnnotationPresent(Route.class);
   }
 
   private boolean hasLegacyVaadin() {
@@ -289,11 +296,23 @@ final class ClassInstrumentationUtil {
           internalParentName,
           null);
 
+      generateRouteAnnotation(cw, parent);
       generateConstructor(cw, internalParentName);
       generateClientCallableOverrides(cw, parent, internalClassName, internalParentName);
 
       cw.visitEnd();
       return cw.toByteArray();
+    }
+
+    private void generateRouteAnnotation(ClassWriter cw, Class<?> parent) {
+      if (needsRouteAnnotation(parent)) {
+        InstrumentedRoute instrumentedRoute = parent.getAnnotation(InstrumentedRoute.class);
+        AnnotationVisitor av = cw.visitAnnotation(Type.getDescriptor(Route.class), true);
+        av.visit("value", instrumentedRoute.value());
+        av.visit("layout", Type.getType(instrumentedRoute.layout()));
+        av.visit("registerAtStartup", false);
+        av.visitEnd();
+      }
     }
 
     private void generateConstructor(ClassWriter cw, String internalParentName) {
