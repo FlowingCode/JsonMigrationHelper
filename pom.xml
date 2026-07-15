@@ -4,7 +4,7 @@
 
     <groupId>com.flowingcode.vaadin</groupId>
     <artifactId>json-migration-helper-parent</artifactId>
-    <version>0.9.5</version>
+    <version>0.9.6-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>Json Migration Helper Parent</name>
     <description>Aggregator build: the json-migration-helper library plus cross-version test modules.</description>
@@ -20,7 +20,7 @@
         <url>https://github.com/FlowingCode/JsonMigrationHelper</url>
         <connection>scm:git:git://github.com/FlowingCode/JsonMigrationHelper.git</connection>
         <developerConnection>scm:git:ssh://git@github.com:/FlowingCode/JsonMigrationHelper.git</developerConnection>
-        <tag>0.9.5</tag>
+        <tag>master</tag>
     </scm>
 
     <modules>
@@ -50,7 +50,7 @@
         <asm.version>9.8</asm.version>
 
         <!-- The library artifact under test (built by the 'core' module). -->
-        <core.version>0.9.5</core.version>
+        <core.version>0.9.6-SNAPSHOT</core.version>
     </properties>
 
     <dependencyManagement>
